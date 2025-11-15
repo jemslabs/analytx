@@ -1,15 +1,86 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  name           String
+  email          String          @unique
+  password       String
+  role           UserRole
+  brandProfile   BrandProfile?
+  creatorProfile CreatorProfile?
+  createdAt      DateTime        @default(now())
+}
+
+model BrandProfile {
+  id       Int              @id @default(autoincrement())
+  userId   Int              @unique
+  user     User             @relation(fields: [userId], references: [id])
+  name     String
+  industry IndustryCategory
+
+  products  Product[]
+  campaigns Campaign[]
+  createdAt DateTime   @default(now())
+}
+
+model CreatorProfile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id      Int          @id @default(autoincrement())
+  brandId Int
+  brand   BrandProfile @relation(fields: [brandId], references: [id])
+  name    String
+  price   Float
+  url     String
+
+  campaigns CampaignProduct[]
+  createdAt DateTime          @default(now())
+}
+
+model Campaign {
+  id        Int               @id @default(autoincrement())
+  brandId   Int
+  brand     BrandProfile      @relation(fields: [brandId], references: [id])
+  title     String
+  startDate DateTime?
+  endDate   DateTime?
+  publicId  String            @unique @default(uuid())
+  products  CampaignProduct[]
+  createdAt DateTime          @default(now())
+}
+
+model CampaignProduct {
+  id         Int @id @default(autoincrement())
+  campaignId Int
+  productId  Int
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@unique([campaignId, productId])
+}
+
+enum UserRole {
+  BRAND
+  CREATOR
+}
+
+enum IndustryCategory {
+  TECHNOLOGY // tech, electronics, software, gadgets
+  CONSUMER_GOODS // fashion, beauty, lifestyle, home, pets
+  FOOD_AND_HEALTH // food, beverage, fitness, wellness
+  ENTERTAINMENT // gaming, movies, music, events
+  OTHER
 }
