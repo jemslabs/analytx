@@ -13,11 +13,10 @@ export async function generateToken(id: number, response: NextResponse) {
     sameSite: "lax",
   });
   return response;
-}
+};
 
 export const getToken = async () => {
   const token = (await cookies()).get("token")?.value;
-  console.log(token)
   if (token) {
     const decoded = jwt.verify(token, SECRET_KEY) as { id: number };
     return decoded.id;

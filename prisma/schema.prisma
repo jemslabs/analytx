@@ -1,12 +1,12 @@
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
-
 model User {
   id             Int             @id @default(autoincrement())
   email          String          @unique
@@ -25,7 +25,6 @@ model BrandProfile {
   user         User             @relation(fields: [userId], references: [id])
   name         String
   slug         String           @unique
-  logo         String?
   description  String?
   industry     IndustryCategory @default(OTHER)
   websiteUrl   String?
@@ -42,7 +41,6 @@ model CreatorProfile {
   user       User              @relation(fields: [userId], references: [id])
   name       String
   slug       String            @unique
-  profilePic String?
   bio        String?
   niche      CreatorNiche
   platforms  CreatorPlatform[]
