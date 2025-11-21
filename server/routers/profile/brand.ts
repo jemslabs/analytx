@@ -23,108 +23,116 @@ export const brandProfileRouter = router({
   create: publicProcedure
     .input(createBrandProfile)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
-      if (!userId) {
+      try {
+        const userId = ctx.userId;
+        if (!userId) {
+          return {
+            success: false,
+            message: "Unauthorized",
+          };
+        }
+
+        const prisma = ctx.prisma;
+        const user = await prisma.user.findUnique({
+          where: {
+            id: userId,
+          },
+        });
+        if (!user) {
+          return {
+            success: false,
+            message: "User not found.",
+          };
+        }
+
+        if (user.role !== "BRAND") {
+          return {
+            success: false,
+            message: "Only brands can create a brand profile.",
+          };
+        }
+
+        const { name, websiteUrl, industry, description, contactEmail } = input;
+        const slug = await generateUniqueBrandSlug(prisma, name);
+
+        const existing = await prisma.brandProfile.findUnique({
+          where: { userId },
+        });
+
+        if (existing) {
+          return {
+            success: false,
+            message: "Brand profile already exists.",
+          };
+        }
+
+        const profile = await prisma.brandProfile.create({
+          data: {
+            name,
+            websiteUrl,
+            industry,
+            description,
+            contactEmail,
+            slug,
+            userId: userId,
+          },
+        });
+
         return {
-          success: false,
-          message: "Unauthorized",
+          success: true,
+          message: "Your brand profile is now set up.",
+          data: profile,
         };
+      } catch {
+        return { success: false, message: "Internal server error" };
       }
-
-      const prisma = ctx.prisma;
-      const user = await prisma.user.findUnique({
-        where: {
-          id: userId,
-        },
-      });
-      if (!user) {
-        return {
-          success: false,
-          message: "User not found.",
-        };
-      }
-
-      if (user.role !== "BRAND") {
-        return {
-          success: false,
-          message: "Only brands can create a brand profile.",
-        };
-      }
-
-      const { name, websiteUrl, industry, description, contactEmail } = input;
-      const slug = await generateUniqueBrandSlug(prisma, name);
-
-      const existing = await prisma.brandProfile.findUnique({
-        where: { userId },
-      });
-
-      if (existing) {
-        return {
-          success: false,
-          message: "Brand profile already exists.",
-        };
-      }
-
-      const profile = await prisma.brandProfile.create({
-        data: {
-          name,
-          websiteUrl,
-          industry,
-          description,
-          contactEmail,
-          slug,
-          userId: userId,
-        },
-      });
-
-      return {
-        success: true,
-        message: "Your brand profile is now set up.",
-        data: profile,
-      };
     }),
   update: publicProcedure
     .input(updateBrandProfile)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
-      if (!userId) {
+      try {
+        const userId = ctx.userId;
+        if (!userId) {
+          return {
+            success: false,
+            message: "Unauthorized",
+          };
+        }
+        const prisma = ctx.prisma;
+
+        const existing = await prisma.brandProfile.findUnique({
+          where: { userId },
+        });
+
+        if (!existing) {
+          return {
+            success: false,
+            message: "Brand profile not found",
+          };
+        }
+
+        let slug = existing.slug;
+        if (
+          input.name &&
+          input.name.trim().toLowerCase() !== existing.name.trim().toLowerCase()
+        ) {
+          slug = await generateUniqueBrandSlug(prisma, input.name);
+        }
+
+        const updated = await prisma.brandProfile.update({
+          where: { id: existing.id },
+          data: {
+            ...input,
+            slug,
+          },
+        });
         return {
-          success: false,
-          message: "Unauthorized",
+          success: true,
+          message: "Your brand profile has been updated.",
+          data: updated,
         };
+      } catch {
+        return { success: false, message: "Internal server error" };
       }
-      const prisma = ctx.prisma;
-
-      const existing = await prisma.brandProfile.findUnique({
-        where: { userId },
-      });
-
-      if (!existing) {
-        return {
-          success: false,
-          message: "Brand profile not found",
-        };
-      }
-
-      let slug = existing.slug;
-      if (
-        input.name &&
-        input.name.trim().toLowerCase() !== existing.name.trim().toLowerCase()
-      ) {
-        slug = await generateUniqueBrandSlug(prisma, input.name);
-      }
-
-      const updated = await prisma.brandProfile.update({
-        where: { id: existing.id },
-        data: {
-          ...input,
-          slug,
-        },
-      });
-      return {
-        success: true,
-        message: "Your brand profile has been updated.",
-        data: updated,
-      };
     }),
 });
