@@ -32,8 +32,28 @@ export const brandProfileRouter = router({
       }
 
       const prisma = ctx.prisma;
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found.",
+        };
+      }
+
+      if (user.role !== "BRAND") {
+        return {
+          success: false,
+          message: "Only brands can create a brand profile.",
+        };
+      }
+
       const { name, websiteUrl, industry, description, contactEmail } = input;
       const slug = await generateUniqueBrandSlug(prisma, name);
+
       const existing = await prisma.brandProfile.findUnique({
         where: { userId },
       });

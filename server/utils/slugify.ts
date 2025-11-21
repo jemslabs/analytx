@@ -23,3 +23,22 @@ export async function generateUniqueBrandSlug(prisma: PrismaClient, name: string
 
   return unique;
 }
+export async function generateUniqueCreatorSlug(prisma: PrismaClient, name: string) {
+  const base = makeSlug(name);
+  let unique = base;
+  let counter = 1;
+
+  while (true) {
+    const exists = await prisma.creatorProfile.findUnique({
+      where: { slug: unique },
+    });
+
+    if (!exists) break;
+
+    unique = `${base}-${counter}`;
+    counter++;
+  }
+
+  return unique;
+}
+

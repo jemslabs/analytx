@@ -1,7 +1,6 @@
 
 generator client {
-  provider = "prisma-client"
-  output   = "../lib/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -55,7 +54,7 @@ model CreatorPlatform {
   creator   CreatorProfile @relation(fields: [creatorId], references: [id])
   platform  PlatformType
   username  String
-  link      String
+  url      String
   followers Int
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
