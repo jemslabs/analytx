@@ -1,39 +1,127 @@
-import { CreatorNiche, PlatformType } from "@prisma/client";
-import { router, publicProcedure } from "../../trpc";
+import {
+  addCreatorPlatform,
+  createBrandProfile,
+  createCreatorProfileSchema,
+  updateBrandProfile,
+  updateCreatorProfileSchema,
+} from "@/server/utils/zod";
+import { router, protectedProcedure } from "../../trpc";
+import {
+  generateUniqueBrandSlug,
+  generateUniqueCreatorSlug,
+} from "@/server/utils/slugify";
 import { z } from "zod";
-import { generateUniqueCreatorSlug } from "@/server/utils/slugify";
 
-const createCreatorProfileSchema = z.object({
-  name: z.string().min(2),
-  bio: z.string().optional(),
-  niche: z.nativeEnum(CreatorNiche),
-});
 
-const updateCreatorProfileSchema = z.object({
-  name: z.string().optional(),
-  bio: z.string().optional(),
-  niche: z.nativeEnum(CreatorNiche).optional(),
-});
-
-const addCreatorPlatform = z.object({
-  platform: z.nativeEnum(PlatformType),
-  username: z.string(),
-  url: z.url(),
-  followers: z.number(),
-});
-export const creatorProfileRouter = router({
-  create: publicProcedure
-    .input(createCreatorProfileSchema)
+export const profileRouter = router({
+  createBrandProfile: protectedProcedure
+    .input(createBrandProfile)
     .mutation(async ({ ctx, input }) => {
       try {
         const userId = ctx.userId;
 
-        if (!userId) {
+        const prisma = ctx.prisma;
+        const user = await prisma.user.findUnique({
+          where: {
+            id: userId,
+          },
+        });
+        if (!user) {
           return {
             success: false,
-            message: "Unauthorized",
+            message: "User not found.",
           };
         }
+
+        if (user.role !== "BRAND") {
+          return {
+            success: false,
+            message: "Only brands can create a brand profile.",
+          };
+        }
+
+        const { name, websiteUrl, industry, description, contactEmail } = input;
+        const slug = await generateUniqueBrandSlug(prisma, name);
+
+        const existing = await prisma.brandProfile.findUnique({
+          where: { userId },
+        });
+
+        if (existing) {
+          return {
+            success: false,
+            message: "Brand profile already exists.",
+          };
+        }
+
+        const profile = await prisma.brandProfile.create({
+          data: {
+            name,
+            websiteUrl,
+            industry,
+            description,
+            contactEmail,
+            slug,
+            userId: userId,
+          },
+        });
+
+        return {
+          success: true,
+          message: "Your brand profile is now set up.",
+          data: profile,
+        };
+      } catch {
+        return { success: false, message: "Internal server error" };
+      }
+    }),
+  updateBrandProfile: protectedProcedure
+    .input(updateBrandProfile)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const userId = ctx.userId;
+        const prisma = ctx.prisma;
+
+        const existing = await prisma.brandProfile.findUnique({
+          where: { userId },
+        });
+
+        if (!existing) {
+          return {
+            success: false,
+            message: "Brand profile not found",
+          };
+        }
+
+        let slug = existing.slug;
+        if (
+          input.name &&
+          input.name.trim().toLowerCase() !== existing.name.trim().toLowerCase()
+        ) {
+          slug = await generateUniqueBrandSlug(prisma, input.name);
+        }
+
+        const updated = await prisma.brandProfile.update({
+          where: { id: existing.id },
+          data: {
+            ...input,
+            slug,
+          },
+        });
+        return {
+          success: true,
+          message: "Your brand profile has been updated.",
+          data: updated,
+        };
+      } catch {
+        return { success: false, message: "Internal server error" };
+      }
+    }),
+  createCreatorProfile: protectedProcedure
+    .input(createCreatorProfileSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const userId = ctx.userId;
 
         const prisma = ctx.prisma;
         const user = await prisma.user.findUnique({
@@ -51,7 +139,7 @@ export const creatorProfileRouter = router({
         if (user.role !== "CREATOR") {
           return {
             success: false,
-            message: "Only creators can create a brand profile.",
+            message: "Only creators can create a creator profile.",
           };
         }
         const existing = await prisma.creatorProfile.findUnique({
@@ -88,20 +176,11 @@ export const creatorProfileRouter = router({
         return { success: false, message: "Internal server error" };
       }
     }),
-
-  update: publicProcedure
+  updateCreatorProfile: protectedProcedure
     .input(updateCreatorProfileSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const userId = ctx.userId;
-
-        if (!userId) {
-          return {
-            success: false,
-            message: "Unauthorized",
-          };
-        }
-
         const prisma = ctx.prisma;
 
         const existing = await prisma.creatorProfile.findUnique({
@@ -137,19 +216,11 @@ export const creatorProfileRouter = router({
       }
     }),
 
-  addPlatform: publicProcedure
+  addCreatorPlatform: protectedProcedure
     .input(addCreatorPlatform)
     .mutation(async ({ ctx, input }) => {
       try {
         const userId = ctx.userId;
-
-        if (!userId) {
-          return {
-            success: false,
-            message: "Unauthorized",
-          };
-        }
-
         const prisma = ctx.prisma;
 
         const creator = await prisma.creatorProfile.findUnique({
@@ -194,8 +265,7 @@ export const creatorProfileRouter = router({
         return { success: false, message: "Internal server error" };
       }
     }),
-
-  deletePlatform: publicProcedure
+  deleteCreatorPlatform: protectedProcedure
     .input(
       z.object({
         platformId: z.number(),
@@ -204,13 +274,6 @@ export const creatorProfileRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         const userId = ctx.userId;
-
-        if (!userId) {
-          return {
-            success: false,
-            message: "Unauthorized",
-          };
-        }
 
         const prisma = ctx.prisma;
 

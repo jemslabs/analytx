@@ -1,7 +1,7 @@
-import { router, publicProcedure } from "../../trpc";
+import { router, protectedProcedure } from "../../trpc";
 import { z } from "zod";
 export const adminRouter = router({
-  verifyBrand: publicProcedure
+  verifyBrand: protectedProcedure
     .input(
       z.object({
         brandId: z.number(),
@@ -11,13 +11,6 @@ export const adminRouter = router({
       try {
         const prisma = ctx.prisma;
         const userId = ctx.userId;
-
-        if (!userId) {
-          return {
-            success: false,
-            message: "Unauthorized",
-          };
-        }
         const user = await prisma.user.findUnique({
           where: {
             id: userId,

@@ -30,9 +30,10 @@ model BrandProfile {
   websiteUrl   String?
   contactEmail String?
   verified     Boolean          @default(false)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  products     Product[]
+  campaigns    Campaign[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime?        @updatedAt
 }
 
 model CreatorProfile {
@@ -59,6 +60,51 @@ model CreatorPlatform {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 }
+
+model Product {
+  id         Int           @id @default(autoincrement())
+  brandId    Int
+  brand      BrandProfile  @relation(fields: [brandId], references: [id])
+  name       String
+  price      Float
+  skuId      String
+  productUrl String
+  currency   Currency      @default(INR)
+  status     ProductStatus
+
+  campaignProducts CampaignProduct[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@unique([brandId, skuId])
+}
+
+model Campaign {
+  id          Int               @id @default(autoincrement())
+  brandId     Int
+  brand       BrandProfile      @relation(fields: [brandId], references: [id])
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  status      CampaignStatus    @default(DRAFT)
+  products    CampaignProduct[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model CampaignProduct {
+  id         Int @id @default(autoincrement())
+  campaignId Int
+  productId  Int
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@unique([campaignId, productId])
+}
+
+
 
 enum UserRole {
   BRAND
@@ -100,4 +146,19 @@ enum PlatformType {
   LINKEDIN
   FACEBOOK
   OTHER
+}
+
+enum Currency {
+  INR
+}
+
+enum ProductStatus {
+  AVAILABLE
+  UNAVAILABLE
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
 }
