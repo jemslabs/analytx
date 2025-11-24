@@ -13,6 +13,23 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
     },
   });
 });
+const enforceCreator = t.middleware(({ ctx, next }) => {
+  if (ctx.role !== "CREATOR") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+
+  return next();
+});
+
+const enforceBrand = t.middleware(({ ctx, next }) => {
+  if (ctx.role !== "BRAND") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+
+  return next();
+});
 export const router = t.router;
 export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const creatorProcedure = protectedProcedure.use(enforceCreator);
+export const brandProcedure = protectedProcedure.use(enforceBrand);

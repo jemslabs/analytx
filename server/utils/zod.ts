@@ -1,4 +1,4 @@
-import { CreatorNiche, IndustryCategory, PlatformType } from '@/lib/generated/prisma/client/enums';
+import { CreatorNiche, IndustryCategory, PlatformType, ProductStatus } from '@/lib/generated/prisma/client/enums';
 import {z} from 'zod'
 
 export const createBrandProfile = z.object({
@@ -35,3 +35,18 @@ export const addCreatorPlatform = z.object({
   url: z.url(),
   followers: z.number(),
 });
+
+export const createProductSchema = z.object({
+  name: z.string(),
+  basePrice: z.number().positive(),
+  skuId: z.string(),
+  productUrl: z.url(),
+});
+
+export const updateProductSchema = z.object({
+  productId: z.number(),
+  name: z.string().optional(),
+  basePrice: z.number().positive().optional(),
+  productUrl: z.url().optional(),
+  status: z.nativeEnum(ProductStatus)
+})

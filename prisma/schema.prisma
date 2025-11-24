@@ -45,6 +45,7 @@ model CreatorProfile {
   bio       String?
   niche     CreatorNiche
   platforms CreatorPlatform[]
+  campaigns CampaignMember[]
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 }
@@ -66,11 +67,11 @@ model Product {
   brandId    Int
   brand      BrandProfile  @relation(fields: [brandId], references: [id])
   name       String
-  price      Float
+  basePrice  Float
   skuId      String
   productUrl String
   currency   Currency      @default(INR)
-  status     ProductStatus
+  status     ProductStatus @default(AVAILABLE)
 
   campaignProducts CampaignProduct[]
   createdAt        DateTime          @default(now())
@@ -80,17 +81,21 @@ model Product {
 }
 
 model Campaign {
-  id          Int               @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   brandId     Int
-  brand       BrandProfile      @relation(fields: [brandId], references: [id])
+  brand       BrandProfile @relation(fields: [brandId], references: [id])
   name        String
   description String?
-  startDate   DateTime
-  endDate     DateTime?
-  status      CampaignStatus    @default(DRAFT)
-  products    CampaignProduct[]
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+
+  startDate DateTime
+  endDate   DateTime?
+  status    CampaignStatus @default(DRAFT)
+  redirectUrl String
+  products  CampaignProduct[]
+  invites   CampaignInvite[]
+  members   CampaignMember[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 }
 
 model CampaignProduct {
@@ -104,7 +109,36 @@ model CampaignProduct {
   @@unique([campaignId, productId])
 }
 
+model CampaignInvite {
+  id         Int          @id @default(autoincrement())
+  campaignId Int
+  campaign   Campaign     @relation(fields: [campaignId], references: [id])
+  email      String
+  status     InviteStatus @default(PENDING)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, email])
+}
+
+model CampaignMember {
+  id Int @id @default(autoincrement())
+
+  campaignId Int
+  creatorId  Int
+
+  // Unique tracking code per assigned creator
+  referralCode String @unique
+
+  campaign Campaign       @relation(fields: [campaignId], references: [id])
+  creator  CreatorProfile @relation(fields: [creatorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, creatorId])
+}
 
 enum UserRole {
   BRAND
@@ -161,4 +195,11 @@ enum CampaignStatus {
   DRAFT
   ACTIVE
   COMPLETED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
 }
