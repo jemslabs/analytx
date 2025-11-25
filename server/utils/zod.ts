@@ -69,3 +69,8 @@ export const updateCampaignSchema = z.object({
   endDate: z.date().optional(),
   redirectUrl: z.url().optional(),
 });
+
+export const addProductInCampaignSchema = z.object({
+  productId: z.number(),
+  campaignId: z.number()
+})

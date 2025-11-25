@@ -91,6 +91,8 @@ model Campaign {
   endDate   DateTime?
   status    CampaignStatus @default(DRAFT)
   redirectUrl String
+
+  
   products  CampaignProduct[]
   invites   CampaignInvite[]
   members   CampaignMember[]
