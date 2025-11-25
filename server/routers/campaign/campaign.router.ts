@@ -1,10 +1,10 @@
-import { createProductSchema, updateProductSchema } from "@/server/utils/zod";
-import { router, brandProcedure } from "../../trpc";
+import { createCampaignSchema, updateCampaignSchema } from "@/server/utils/zod";
+import { router, brandProcedure, creatorProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 
-export const productRouter = router({
-  createProduct: brandProcedure
-    .input(createProductSchema)
+export const campaignRouter = router({
+  createCampaign: brandProcedure
+    .input(createCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
       const userId = ctx.userId;
@@ -22,27 +22,28 @@ export const productRouter = router({
           });
         }
 
-        const { name, basePrice, productUrl, skuId } = input;
+        const { name, description, startDate, endDate, redirectUrl } = input;
 
-        await prisma.product.create({
+        await prisma.campaign.create({
           data: {
             brandId: brand.id,
             name,
-            basePrice,
-            skuId,
-            productUrl,
+            description,
+            startDate,
+            endDate,
+            redirectUrl,
           },
         });
 
-        return { success: true, message: "Product created successfully" };
-      } catch(err) {
+        return { success: true, message: "Campaign Created" };
+      } catch (err) {
         if (err instanceof TRPCError) throw err;
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
 
-  updateProduct: brandProcedure
-    .input(updateProductSchema)
+  updateCampaign: brandProcedure
+    .input(updateCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
       const userId = ctx.userId;
@@ -59,43 +60,40 @@ export const productRouter = router({
             message: "Brand profile not found",
           });
         }
-        const { productId, status, basePrice, name, productUrl } = input;
-        const product = await prisma.product.findUnique({
+
+        const { campaignId, endDate, redirectUrl } = input;
+        const campaign = await prisma.campaign.findUnique({
           where: {
-            id: productId,
+            id: campaignId,
           },
         });
-        if (!product) {
+        if (!campaign) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Product not found",
+            message: "Campaign not found",
           });
         }
-        if (product.brandId !== brand.id) {
+        if (campaign.brandId !== brand.id) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "You cannot edit another brand’s product",
+            message: "You cannot update another brand’s campaign",
           });
         }
-        await prisma.product.update({
+
+        await prisma.campaign.update({
           where: {
-            id: productId,
+            id: campaign.id,
           },
           data: {
-            basePrice,
-            name,
-            status,
-            productUrl,
+            endDate,
+            redirectUrl,
           },
         });
 
-        return {
-          success: true,
-          message: "Product updated successfully",
-        };
-      } catch(err) {
+        return { success: true, message: "Campaign Updated" };
+      } catch (err) {
         if (err instanceof TRPCError) throw err;
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
 });

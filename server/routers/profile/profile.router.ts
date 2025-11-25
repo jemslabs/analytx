@@ -11,7 +11,7 @@ import {
   generateUniqueCreatorSlug,
 } from "@/server/utils/slugify";
 import { z } from "zod";
-
+import { TRPCError } from "@trpc/server";
 
 export const profileRouter = router({
   createBrandProfile: protectedProcedure
@@ -27,17 +27,17 @@ export const profileRouter = router({
           },
         });
         if (!user) {
-          return {
-            success: false,
-            message: "User not found.",
-          };
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
         }
 
         if (user.role !== "BRAND") {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
             message: "Only brands can create a brand profile.",
-          };
+          });
         }
 
         const { name, websiteUrl, industry, description, contactEmail } = input;
@@ -48,10 +48,10 @@ export const profileRouter = router({
         });
 
         if (existing) {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "CONFLICT",
             message: "Brand profile already exists.",
-          };
+          });
         }
 
         const profile = await prisma.brandProfile.create({
@@ -71,8 +71,9 @@ export const profileRouter = router({
           message: "Your brand profile is now set up.",
           data: profile,
         };
-      } catch {
-        return { success: false, message: "Internal server error" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
   updateBrandProfile: protectedProcedure
@@ -87,10 +88,10 @@ export const profileRouter = router({
         });
 
         if (!existing) {
-          return {
-            success: false,
-            message: "Brand profile not found",
-          };
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found.",
+          });
         }
 
         let slug = existing.slug;
@@ -113,8 +114,9 @@ export const profileRouter = router({
           message: "Your brand profile has been updated.",
           data: updated,
         };
-      } catch {
-        return { success: false, message: "Internal server error" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
   createCreatorProfile: protectedProcedure
@@ -130,27 +132,27 @@ export const profileRouter = router({
           },
         });
         if (!user) {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "NOT_FOUND",
             message: "User not found.",
-          };
+          });
         }
 
         if (user.role !== "CREATOR") {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
             message: "Only creators can create a creator profile.",
-          };
+          });
         }
         const existing = await prisma.creatorProfile.findUnique({
           where: { userId },
         });
 
         if (existing) {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "CONFLICT",
             message: "A creator profile already exists for this account.",
-          };
+          });
         }
 
         const { name, bio, niche } = input;
@@ -172,8 +174,9 @@ export const profileRouter = router({
           message: "Your creator profile is now set up.",
           data: profile,
         };
-      } catch {
-        return { success: false, message: "Internal server error" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
   updateCreatorProfile: protectedProcedure
@@ -188,10 +191,10 @@ export const profileRouter = router({
         });
 
         if (!existing) {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "NOT_FOUND",
             message: "Creator profile not found.",
-          };
+          });
         }
         let slug = existing.slug;
         if (input.name && input.name !== existing.name) {
@@ -211,8 +214,9 @@ export const profileRouter = router({
           message: "Your creator profile has been updated.",
           data: updated,
         };
-      } catch {
-        return { success: false, message: "Internal server error" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
 
@@ -230,10 +234,10 @@ export const profileRouter = router({
         });
 
         if (!creator) {
-          return {
-            success: false,
-            message: "Creator profile not found",
-          };
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Creator profile not found.",
+          });
         }
         const existing = await prisma.creatorPlatform.findFirst({
           where: {
@@ -243,10 +247,10 @@ export const profileRouter = router({
         });
 
         if (existing) {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "CONFLICT",
             message: "You already added this platform.",
-          };
+          });
         }
         await prisma.creatorPlatform.create({
           data: {
@@ -261,8 +265,9 @@ export const profileRouter = router({
           success: true,
           message: "Added this platform.",
         };
-      } catch {
-        return { success: false, message: "Internal server error" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
   deleteCreatorPlatform: protectedProcedure
@@ -282,10 +287,10 @@ export const profileRouter = router({
         });
 
         if (!creator) {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "NOT_FOUND",
             message: "Creator profile not found.",
-          };
+          });
         }
 
         const existing = await prisma.creatorPlatform.findFirst({
@@ -296,10 +301,10 @@ export const profileRouter = router({
         });
 
         if (!existing) {
-          return {
-            success: false,
+          throw new TRPCError({
+            code: "NOT_FOUND",
             message: "This platform is not added yet.",
-          };
+          });
         }
         await prisma.creatorPlatform.delete({
           where: { id: existing.id },
@@ -309,8 +314,9 @@ export const profileRouter = router({
           success: true,
           message: "Platform removed.",
         };
-      } catch {
-        return { success: false, message: "Internal server error" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
 });

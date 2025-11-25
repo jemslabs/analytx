@@ -1,5 +1,10 @@
-import { CreatorNiche, IndustryCategory, PlatformType, ProductStatus } from '@/lib/generated/prisma/client/enums';
-import {z} from 'zod'
+import {
+  CreatorNiche,
+  IndustryCategory,
+  PlatformType,
+  ProductStatus,
+} from "@/lib/generated/prisma/client/enums";
+import { z } from "zod";
 
 export const createBrandProfile = z.object({
   name: z.string(),
@@ -48,5 +53,19 @@ export const updateProductSchema = z.object({
   name: z.string().optional(),
   basePrice: z.number().positive().optional(),
   productUrl: z.url().optional(),
-  status: z.nativeEnum(ProductStatus)
-})
+  status: z.nativeEnum(ProductStatus),
+});
+
+export const createCampaignSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  startDate: z.date(),
+  endDate: z.date(),
+  redirectUrl: z.url(),
+});
+
+export const updateCampaignSchema = z.object({
+  campaignId: z.number(),
+  endDate: z.date().optional(),
+  redirectUrl: z.url().optional(),
+});
