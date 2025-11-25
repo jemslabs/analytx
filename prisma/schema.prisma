@@ -202,6 +202,4 @@ enum CampaignStatus {
 enum InviteStatus {
   PENDING
   ACCEPTED
-  REJECTED
-  EXPIRED
 }
