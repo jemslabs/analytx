@@ -180,6 +180,8 @@ model ClickEvent {
   timestamp DateTime       @default(now())
 }
 
+
+
 enum UserRole {
   BRAND
   CREATOR

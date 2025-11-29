@@ -37,6 +37,9 @@ export async function POST(req: Request) {
     // 1. Validate Member
     const member = await prisma.campaignMember.findUnique({
       where: { id: referralCode.memberId },
+      include: {
+        campaign: true
+      }
     });
 
     if (!member) {
@@ -45,7 +48,12 @@ export async function POST(req: Request) {
         { status: 404 }
       );
     }
-
+    if (member.campaign.status !== "ACTIVE") {
+      return NextResponse.json(
+        { msg: "Campaign is not active" },
+        { status: 400 }
+      );
+    }
     // 2. Validate Product belongs to brand
     const product = await prisma.product.findFirst({
       where: {
@@ -82,7 +90,7 @@ export async function POST(req: Request) {
         memberId: member.id,
         salePrice,
         campaignProductId: campaignProduct.id,
-        platform: referralCode.platform
+        platform: referralCode.platform,
       },
     });
 

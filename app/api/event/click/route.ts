@@ -28,6 +28,12 @@ export async function POST(req: Request) {
     if (!member) {
       return NextResponse.json({ msg: "Invalid Referral Code" }, { status: 404 });
     }
+    if (member.campaign.status !== "ACTIVE") {
+      return NextResponse.json(
+        { msg: "Campaign is not active" },
+        { status: 400 }
+      );
+    }
 
     const ip =
       req.headers.get("x-nf-client-connection-ip") ??

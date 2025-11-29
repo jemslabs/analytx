@@ -74,6 +74,9 @@ export const addProductInCampaignSchema = z.object({
   productId: z.number(),
   campaignId: z.number()
 })
+export const removeProductFromCampaignSchema = z.object({
+  campaignProductId: z.number(),
+})
 
 export const sendCampaignInviteSchema = z.object({
   campaignId: z.number(),

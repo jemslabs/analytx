@@ -3,6 +3,7 @@ import {
   addProductInCampaignSchema,
   createCampaignSchema,
   createReferralCodeSchema,
+  removeProductFromCampaignSchema,
   sendCampaignInviteSchema,
   updateCampaignSchema,
 } from "@/server/utils/zod";
@@ -141,6 +142,13 @@ export const campaignRouter = router({
             message: "You do not have permission to modify this campaign.",
           });
         }
+        if (campaign.status !== "DRAFT") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "Products can only be modified when the campaign is in draft mode.",
+          });
+        }
 
         const product = await prisma.product.findUnique({
           where: {
@@ -201,6 +209,66 @@ export const campaignRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
+  removeProductFromCampaign: brandProcedure
+    .input(removeProductFromCampaignSchema)
+    .mutation(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+      const { campaignProductId } = input;
+
+      try {
+        const brand = await prisma.brandProfile.findUnique({
+          where: { userId },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found",
+          });
+        }
+
+        const campaignProduct = await prisma.campaignProduct.findUnique({
+          where: { id: campaignProductId },
+          include: { campaign: true },
+        });
+
+        if (!campaignProduct) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign product not found",
+          });
+        }
+
+        if (campaignProduct.campaign.brandId !== brand.id) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You do not have permission to modify this campaign.",
+          });
+        }
+
+        if (campaignProduct.campaign.status !== "DRAFT") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "Products can only be removed when the campaign is in draft mode.",
+          });
+        }
+
+        await prisma.campaignProduct.delete({
+          where: { id: campaignProductId },
+        });
+
+        return {
+          success: true,
+          message: "Product removed from campaign.",
+        };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
   sendCampaignInvite: brandProcedure
     .input(sendCampaignInviteSchema)
     .mutation(async ({ ctx, input }) => {
@@ -245,6 +313,12 @@ export const campaignRouter = router({
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "You do not have permission to modify this campaign.",
+          });
+        }
+        if (campaign.status !== "DRAFT") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cannot send campaign invite",
           });
         }
         const existingInvite = await prisma.campaignInvite.findUnique({
@@ -328,6 +402,25 @@ export const campaignRouter = router({
         });
       }
 
+      const campaign = await prisma.campaign.findUnique({
+        where: {
+          id: invite.campaignId,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+      if (campaign.status !== "DRAFT") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot join this campaign",
+        });
+      }
+
       // Ensure user is not already a member
       const existingMember = await prisma.campaignMember.findUnique({
         where: {
@@ -406,17 +499,36 @@ export const campaignRouter = router({
             message: "Campaign member not found",
           });
         }
+
+        const campaign = await prisma.campaign.findUnique({
+          where: {
+            id: member.campaignId,
+          },
+        });
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign not found",
+          });
+        }
+
+        if (campaign.status !== "ACTIVE") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cannot generate referral code for inactive campaign",
+          });
+        }
+
         const code = generateUniqueReferralCode();
 
         const referralCodeExists = await prisma.referralCode.findUnique({
           where: {
             memberId_platform: {
               memberId: member.id,
-              platform
-            }
-          }
-          
-        })
+              platform,
+            },
+          },
+        });
 
         if (referralCodeExists) {
           throw new TRPCError({
@@ -435,8 +547,8 @@ export const campaignRouter = router({
         return {
           success: true,
           message: "Referral code created",
-          code
-        }
+          code,
+        };
       } catch (err) {
         if (err instanceof TRPCError) throw err;
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
