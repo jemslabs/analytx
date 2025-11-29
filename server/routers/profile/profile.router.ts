@@ -5,13 +5,14 @@ import {
   updateBrandProfile,
   updateCreatorProfileSchema,
 } from "@/server/utils/zod";
-import { router, protectedProcedure } from "../../trpc";
+import { router, protectedProcedure, brandProcedure } from "../../trpc";
 import {
   generateUniqueBrandSlug,
   generateUniqueCreatorSlug,
 } from "@/server/utils/slugify";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { generateApiKey, hashApiKey } from "@/lib/tools";
 
 export const profileRouter = router({
   createBrandProfile: protectedProcedure
@@ -54,7 +55,10 @@ export const profileRouter = router({
           });
         }
 
-        const profile = await prisma.brandProfile.create({
+        const rawApiKey = generateApiKey();
+        const hashedApiKey = hashApiKey(rawApiKey);
+
+        await prisma.brandProfile.create({
           data: {
             name,
             websiteUrl,
@@ -63,13 +67,14 @@ export const profileRouter = router({
             contactEmail,
             slug,
             userId: userId,
+            apiKey: hashedApiKey,
           },
         });
 
         return {
           success: true,
           message: "Your brand profile is now set up.",
-          data: profile,
+          apiKey: rawApiKey,
         };
       } catch (err) {
         if (err instanceof TRPCError) throw err;
@@ -319,4 +324,43 @@ export const profileRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
+  regenerateAPIKey: brandProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.userId;
+
+    try {
+      const prisma = ctx.prisma;
+      const brandProfile = await prisma.brandProfile.findUnique({
+        where: {
+          userId,
+        },
+      });
+
+      if (!brandProfile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Brand profile not found",
+        });
+      }
+
+      const rawApiKey = generateApiKey();
+      const hashedApiKey = hashApiKey(rawApiKey);
+
+      await prisma.brandProfile.update({
+        where: {
+          id: brandProfile.id,
+        },
+        data: {
+          apiKey: hashedApiKey,
+        },
+      });
+
+      return {
+        success: true,
+        apiKey: rawApiKey,
+      };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
 });

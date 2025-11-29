@@ -2,12 +2,13 @@ import {
   acceptCampaignInviteSchema,
   addProductInCampaignSchema,
   createCampaignSchema,
+  createReferralCodeSchema,
   sendCampaignInviteSchema,
   updateCampaignSchema,
 } from "@/server/utils/zod";
 import { router, brandProcedure, creatorProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
-import { generateUniqueReferralCode } from "@/server/utils/tools";
+import { generateUniqueReferralCode } from "@/lib/tools";
 
 export const campaignRouter = router({
   createCampaign: brandProcedure
@@ -352,25 +353,11 @@ export const campaignRouter = router({
           data: { status: "ACCEPTED" },
         });
 
-        // Create unique referral code
-
-        let referralCode: string;
-        while (true) {
-          const code = generateUniqueReferralCode();
-          const exists = await tx.campaignMember.findUnique({
-            where: { referralCode: code },
-          });
-          if (!exists) {
-            referralCode = code;
-            break;
-          }
-        }
         // Add member
         await tx.campaignMember.create({
           data: {
             campaignId: invite.campaignId,
             creatorId: creator.id,
-            referralCode,
           },
         });
 
@@ -379,5 +366,80 @@ export const campaignRouter = router({
           message: "Invite accepted. You are now a campaign member.",
         };
       });
+    }),
+
+  createReferralCode: creatorProcedure
+    .input(createReferralCodeSchema)
+    .mutation(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { creatorProfile: true },
+        });
+
+        if (!user) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found.",
+          });
+        }
+        const creator = user.creatorProfile;
+        if (!creator) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be a creator to accept invites.",
+          });
+        }
+        const { campaignMemberId, platform } = input;
+        const member = await prisma.campaignMember.findFirst({
+          where: {
+            id: campaignMemberId,
+            creatorId: creator.id,
+          },
+        });
+        if (!member) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign member not found",
+          });
+        }
+        const code = generateUniqueReferralCode();
+
+        const referralCodeExists = await prisma.referralCode.findUnique({
+          where: {
+            memberId_platform: {
+              memberId: member.id,
+              platform
+            }
+          }
+          
+        })
+
+        if (referralCodeExists) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Only one referral code per platform is allowed",
+          });
+        }
+        await prisma.referralCode.create({
+          data: {
+            memberId: member.id,
+            code,
+            platform,
+          },
+        });
+
+        return {
+          success: true,
+          message: "Referral code created",
+          code
+        }
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
     }),
 });

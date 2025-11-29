@@ -83,3 +83,8 @@ export const sendCampaignInviteSchema = z.object({
 export const acceptCampaignInviteSchema = z.object({
   campaignInviteId: z.number()
 })
+
+export const createReferralCodeSchema = z.object({
+  campaignMemberId: z.number(),
+  platform: z.nativeEnum(PlatformType)
+})
