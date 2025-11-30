@@ -1,6 +1,8 @@
 import {
+  CommissionType,
   CreatorNiche,
   IndustryCategory,
+  PayoutModel,
   PlatformType,
   ProductStatus,
 } from "@/lib/generated/prisma/client/enums";
@@ -60,6 +62,10 @@ export const createCampaignSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   redirectUrl: z.url(),
+  payoutModel: z.nativeEnum(PayoutModel),
+  cpsCommissionType: z.nativeEnum(CommissionType),
+  cpsValue: z.number(),
+  cpcValue: z.number(),
 });
 
 export const updateCampaignSchema = z.object({

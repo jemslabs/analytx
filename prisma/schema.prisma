@@ -91,9 +91,15 @@ model Campaign {
   status      CampaignStatus @default(DRAFT)
   redirectUrl String
 
-  products CampaignProduct[]
-  invites  CampaignInvite[]
-  members  CampaignMember[]
+  products          CampaignProduct[]
+  invites           CampaignInvite[]
+  members           CampaignMember[]
+  // CPS and CPC settings
+  currency Currency @default(INR)
+  payoutModel       PayoutModel       @default(BOTH)
+  cpsCommissionType CommissionType
+  cpsValue          Float
+  cpcValue          Float?
 
   startedAt   DateTime?
   completedAt DateTime?
@@ -216,7 +222,7 @@ enum CreatorNiche {
 enum PlatformType {
   INSTAGRAM
   YOUTUBE
-  TWITTER
+  X
   LINKEDIN
   FACEBOOK
   OTHER
@@ -240,4 +246,15 @@ enum CampaignStatus {
 enum InviteStatus {
   PENDING
   ACCEPTED
+}
+
+enum PayoutModel {
+  CPS // cost per sale only
+  CPC // cost per click only
+  BOTH // mix of CPS + CPC
+}
+
+enum CommissionType {
+  PERCENTAGE
+  FIXED
 }

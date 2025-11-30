@@ -10,3 +10,14 @@ export function generateApiKey() {
 export function hashApiKey(apiKey: string) {
   return crypto.createHash("sha256").update(apiKey).digest("hex");
 }
+// let payout = 0;
+
+// if (campaign.payoutModel === "CPS" || campaign.payoutModel === "BOTH") {
+//   payout += campaign.cpsCommissionType === "PERCENTAGE"
+//     ? sale.salePrice * (campaign.cpsValue / 100)
+//     : campaign.cpsValue;
+// }
+
+// if (campaign.payoutModel === "CPC" || campaign.payoutModel === "BOTH") {
+//   payout += clicks * campaign.cpcValue;
+// }

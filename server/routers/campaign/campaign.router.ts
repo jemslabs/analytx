@@ -33,7 +33,15 @@ export const campaignRouter = router({
           });
         }
 
-        const { name, description, redirectUrl } = input;
+        const {
+          name,
+          description,
+          redirectUrl,
+          payoutModel,
+          cpsValue,
+          cpcValue,
+          cpsCommissionType,
+        } = input;
 
         await prisma.campaign.create({
           data: {
@@ -41,6 +49,10 @@ export const campaignRouter = router({
             name,
             description,
             redirectUrl,
+            payoutModel,
+            cpsCommissionType,
+            cpsValue,
+            cpcValue,
           },
         });
 
