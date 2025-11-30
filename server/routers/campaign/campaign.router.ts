@@ -1,10 +1,12 @@
 import {
   acceptCampaignInviteSchema,
   addProductInCampaignSchema,
+  completeCampaignSchema,
   createCampaignSchema,
   createReferralCodeSchema,
   removeProductFromCampaignSchema,
   sendCampaignInviteSchema,
+  startCampaignSchema,
   updateCampaignSchema,
 } from "@/server/utils/zod";
 import { router, brandProcedure, creatorProcedure } from "../../trpc";
@@ -31,15 +33,13 @@ export const campaignRouter = router({
           });
         }
 
-        const { name, description, startDate, endDate, redirectUrl } = input;
+        const { name, description, redirectUrl } = input;
 
         await prisma.campaign.create({
           data: {
             brandId: brand.id,
             name,
             description,
-            startDate,
-            endDate,
             redirectUrl,
           },
         });
@@ -70,7 +70,7 @@ export const campaignRouter = router({
           });
         }
 
-        const { campaignId, endDate, redirectUrl } = input;
+        const { campaignId, redirectUrl } = input;
         const campaign = await prisma.campaign.findUnique({
           where: {
             id: campaignId,
@@ -94,7 +94,6 @@ export const campaignRouter = router({
             id: campaign.id,
           },
           data: {
-            endDate,
             redirectUrl,
           },
         });
@@ -548,6 +547,134 @@ export const campaignRouter = router({
           success: true,
           message: "Referral code created",
           code,
+        };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  startCampaign: brandProcedure
+    .input(startCampaignSchema)
+    .mutation(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+      try {
+        const now = new Date();
+        const brand = await prisma.brandProfile.findUnique({
+          where: {
+            userId,
+          },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be a brand to start a campaign.",
+          });
+        }
+
+        const campaign = await prisma.campaign.findUnique({
+          where: {
+            id: input.campaignId,
+          },
+        });
+
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign not found.",
+          });
+        }
+
+        if (campaign.brandId !== brand.id) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You do not have permission to modify this campaign.",
+          });
+        }
+
+        if (campaign.status !== "DRAFT") {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Only draft campaigns can be activated.",
+          });
+        }
+
+        await prisma.campaign.update({
+          where: {
+            id: campaign.id,
+          },
+          data: {
+            status: "ACTIVE",
+            startedAt: now,
+          },
+        });
+        return {
+          success: true,
+          message: "Campaign Started",
+        };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+  completeCampaign: brandProcedure
+    .input(completeCampaignSchema)
+    .mutation(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+
+      try {
+        const now = new Date();
+
+        const brand = await prisma.brandProfile.findUnique({
+          where: { userId },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be a brand to complete a campaign.",
+          });
+        }
+
+        const campaign = await prisma.campaign.findUnique({
+          where: { id: input.campaignId },
+        });
+
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign not found.",
+          });
+        }
+
+        if (campaign.brandId !== brand.id) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You do not have permission to modify this campaign.",
+          });
+        }
+
+        if (campaign.status !== "ACTIVE") {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Only active campaigns can be completed.",
+          });
+        }
+
+        await prisma.campaign.update({
+          where: { id: campaign.id },
+          data: {
+            status: "COMPLETED",
+            completedAt: now,
+          },
+        });
+
+        return {
+          success: true,
+          message: "Campaign completed.",
         };
       } catch (err) {
         if (err instanceof TRPCError) throw err;

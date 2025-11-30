@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-
 }
 
 model User {
@@ -89,16 +88,17 @@ model Campaign {
   name        String
   description String?
 
-  startDate   DateTime
-  endDate     DateTime?
   status      CampaignStatus @default(DRAFT)
   redirectUrl String
 
-  products  CampaignProduct[]
-  invites   CampaignInvite[]
-  members   CampaignMember[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  products CampaignProduct[]
+  invites  CampaignInvite[]
+  members  CampaignMember[]
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model CampaignProduct {
@@ -179,8 +179,6 @@ model ClickEvent {
   platform  PlatformType
   timestamp DateTime       @default(now())
 }
-
-
 
 enum UserRole {
   BRAND

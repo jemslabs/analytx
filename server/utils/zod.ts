@@ -59,14 +59,11 @@ export const updateProductSchema = z.object({
 export const createCampaignSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
-  startDate: z.date(),
-  endDate: z.date(),
   redirectUrl: z.url(),
 });
 
 export const updateCampaignSchema = z.object({
   campaignId: z.number(),
-  endDate: z.date().optional(),
   redirectUrl: z.url().optional(),
 });
 
@@ -91,3 +88,13 @@ export const createReferralCodeSchema = z.object({
   campaignMemberId: z.number(),
   platform: z.nativeEnum(PlatformType)
 })
+
+
+export const startCampaignSchema = z.object({
+  campaignId: z.number()
+})
+
+export const completeCampaignSchema = z.object({
+  campaignId: z.number()
+})
+
