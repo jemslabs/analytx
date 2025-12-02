@@ -29,7 +29,6 @@ model BrandProfile {
   industry     IndustryCategory @default(OTHER)
   websiteUrl   String?
   contactEmail String?
-  verified     Boolean          @default(false)
   products     Product[]
   campaigns    Campaign[]
   apiKey       String           @unique

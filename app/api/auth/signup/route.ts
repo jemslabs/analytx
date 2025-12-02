@@ -1,4 +1,4 @@
-import {prisma} from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -18,17 +18,16 @@ export async function POST(req: Request) {
     }
 
     const { email, password, role } = validatedReq.data;
-
     const user = await prisma.user.findUnique({
       where: {
         email,
       },
     });
-    
+
     if (user) {
       return NextResponse.json(
         {
-          msg: "Account with this email already exists. Please enter another email",
+          msg: "Account with this email already exists.",
         },
         { status: 400 }
       );

@@ -40,12 +40,13 @@ export async function POST(req: Request) {
 
     const response = NextResponse.json(
       {
-        id: user?.id,
-        email: user?.email,
+        id: user.id,
+        email: user.email,
+        role: user.role
       },
       { status: 200 }
     );
-    const res = await generateToken(user?.id, response);
+    const res = await generateToken(user.id, response);
     return res;
   } catch {
     return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });

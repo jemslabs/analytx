@@ -8,11 +8,7 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
-      },
-      include: {
-        brandProfile: true,
-        creatorProfile: true,
-      },
+      }
     });
 
     if (!user) {
@@ -25,8 +21,6 @@ export async function GET() {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
-        brandProfile: user.brandProfile,
-        creatorProfile: user.creatorProfile,
       },
       { status: 200 }
     );
