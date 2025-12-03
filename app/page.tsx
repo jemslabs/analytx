@@ -10,6 +10,12 @@ export default function Home() {
       <Link href={"/login"}>
       <Button>Login</Button>
       </Link>
+      <Link href={"/onboarding/brand"}>
+      <Button>Brand</Button>
+      </Link>
+      <Link href={"/onboarding/creator"}>
+      <Button>Creator</Button>
+      </Link>
     </div>
   );
 }

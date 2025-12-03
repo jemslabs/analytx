@@ -3,55 +3,68 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useAuthStoreType } from "@/lib/types";
 
-const useAuthStore = create<useAuthStoreType>((set) => ({
+const useAuthStore = create<useAuthStoreType>((set, get) => ({
   user: null,
+  isUserLoading: true,
+
   signup: async (data) => {
     try {
       const res = await axios.post("/api/auth/signup", data);
+
       if (res.status === 200) {
-        toast.success(res.data.msg);
+        toast.success("Account created successfully");
+
+        set({ user: res.data, isUserLoading: false });
+        return res.data;
       }
+
+      toast.error("Failed to create account");
+      return null;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMsg =
           error.response?.data?.msg ||
           "Something went wrong. Please try again.";
         toast.error(errorMsg);
+        return null;
       } else {
         toast.error("An unexpected error occurred.");
+        return null;
       }
     }
   },
+
   login: async (data) => {
     try {
       const res = await axios.post("/api/auth/login", data);
+
       if (res.status === 200) {
-        set({ user: res.data });
         toast.success("You’re now logged in.");
+
+        // Immediately update user state
+        const user = res.data;
+        set({ user, isUserLoading: false });
+
+        return user;
       }
+
+      return null;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const errorMsg =
           error.response?.data?.msg ||
           "Something went wrong. Please try again.";
         toast.error(errorMsg);
+        return null;
       } else {
         toast.error("An unexpected error occurred.");
+        return null;
       }
     }
   },
-  fetchUser: async () => {
-    try {
-      const res = await axios.get("/api/auth/user");
-      if (res.status === 200) {
-        set({ user: res.data });
-      } else {
-        set({ user: null });
-      }
-    } catch {
-      set({ user: null });
-    }
-  },
+
+  setUser: (user) => set({ user }),
+  setIsUserLoading: (value) => set({ isUserLoading: value }),
 }));
 
 export default useAuthStore;

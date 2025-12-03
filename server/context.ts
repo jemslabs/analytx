@@ -16,7 +16,7 @@ export const createContext = async (): Promise<Context> => {
   let userId: number | null = null;
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.SECRET_KEY!) as {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
         id: number;
       };
       userId = decoded.id;

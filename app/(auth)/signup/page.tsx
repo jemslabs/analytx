@@ -14,6 +14,8 @@ import {
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import useAuthStore from "@/stores/useAuth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +27,7 @@ export default function SignupPage() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
+  const router = useRouter();
   const { signup } = useAuthStore()
   // Simple email regex validation
   const validateEmail = (email: string) => {
@@ -54,14 +56,27 @@ export default function SignupPage() {
   };
 
   const handleSignup = async () => {
+    if (emailError || passwordError) return;
+    if (!data.role) {
+      toast.error("Please select a role");
+      return;
+    }
     try {
+
       setIsLoading(true);
-      await signup(data);
-      setData({
-        email: "",
-        password: "",
-        role: ""
-      })
+
+      const afterSignupData = await signup(data);
+      if (!afterSignupData) {
+        toast.error("Something went wrong. Please try again.")
+        return;
+      }
+      if (afterSignupData.role === "BRAND") {
+        router.push("/onboarding/brand")
+      } else {
+        router.push("/onboarding/creator")
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +87,7 @@ export default function SignupPage() {
       <div className="flex w-full text-center">
 
         {/* LEFT SIDE */}
-        <div className="flex flex-col justify-center space-y-8 w-full md:w-1/2 px-4 md:px-20">
+        <div className="flex flex-col justify-center space-y-8 w-full md:w-1/2 px-4 md:px-20 bg-primary/10">
           <div className="space-y-3">
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
               Create Your Account
@@ -139,7 +154,7 @@ export default function SignupPage() {
               <Label>Role</Label>
               <Select
                 value={data.role}
-                onValueChange={(role) => setData({ ...data, role })}  
+                onValueChange={(role) => setData({ ...data, role })}
 
               >
                 <SelectTrigger className="h-12">

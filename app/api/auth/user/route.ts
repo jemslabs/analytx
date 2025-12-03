@@ -1,5 +1,5 @@
 import { getToken } from "@/lib/generateToken";
-import {prisma} from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -8,7 +8,11 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
-      }
+      },
+      include: {
+        brandProfile: true,
+        creatorProfile: true,
+      },
     });
 
     if (!user) {
@@ -21,10 +25,12 @@ export async function GET() {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
+        brandProfile: user.brandProfile,
+        creatorProfile: user.creatorProfile,
       },
       { status: 200 }
     );
-  } catch{
+  } catch {
     return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });
   }
 }

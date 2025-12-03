@@ -21,6 +21,10 @@ export async function POST(req: Request) {
       where: {
         email,
       },
+      include: {
+        brandProfile: true,
+        creatorProfile: true
+      }
     });
 
     if (!user) {
@@ -42,7 +46,10 @@ export async function POST(req: Request) {
       {
         id: user.id,
         email: user.email,
-        role: user.role
+        role: user.role,
+        createdAt: user.createdAt,
+        brandProfile: user.brandProfile,
+        creatorProfile: user.creatorProfile
       },
       { status: 200 }
     );

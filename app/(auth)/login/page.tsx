@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import useAuthStore from "@/stores/useAuth";
 import Link from "next/link";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,8 +19,9 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const { login, user } = useAuthStore()
+  const { login } = useAuthStore()
   // Simple email regex validation
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -46,13 +49,26 @@ export default function LoginPage() {
   };
 
   const handleLogin = async () => {
+    if (emailError || passwordError) return;
     try {
       setIsLoading(true);
-      await login(data);
-      setData({
-        email: "",
-        password: "",
-      })
+      const afterLoginData = await login(data);
+
+
+      if (!afterLoginData) {
+        toast.error("Something went wrong. Please try again.")
+        return;
+      }
+
+      if (afterLoginData.role === "BRAND" && afterLoginData.brandProfile === null) {
+        router.push("/onboarding/brand")
+      } else if (afterLoginData.role === "CREATOR" && afterLoginData.creatorProfile === null) {
+        router.push("/onboarding/creator")
+      } else {
+        router.push("/dashboard")
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +79,7 @@ export default function LoginPage() {
       <div className="flex w-full text-center">
 
         {/* LEFT SIDE */}
-        <div className="flex flex-col justify-center space-y-8 w-full md:w-1/2 px-4 md:px-20">
+        <div className="flex flex-col justify-center space-y-8 w-full md:w-1/2 px-4 md:px-20 bg-primary/10">
           <div className="space-y-3 mb-10">
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
               Welcome Back
