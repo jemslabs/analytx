@@ -31,7 +31,7 @@ model BrandProfile {
   contactEmail String?
   products     Product[]
   campaigns    Campaign[]
-  apiKey       String           @unique
+  apiKey       String?           @unique
   createdAt    DateTime         @default(now())
   updatedAt    DateTime?        @updatedAt
 }
@@ -44,22 +44,9 @@ model CreatorProfile {
   slug      String            @unique
   bio       String?
   niche     CreatorNiche
-  platforms CreatorPlatform[]
   campaigns CampaignMember[]
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-}
-
-model CreatorPlatform {
-  id        Int            @id @default(autoincrement())
-  creatorId Int
-  creator   CreatorProfile @relation(fields: [creatorId], references: [id])
-  platform  PlatformType
-  username  String
-  url       String
-  followers Int
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
 }
 
 model Product {

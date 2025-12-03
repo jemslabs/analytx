@@ -14,23 +14,15 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Copy } from "lucide-react";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 import { IndustryCategoryType } from "@/lib/types";
 import useAuthStore from "@/stores/useAuth";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 export default function BrandOnboarding() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [apiKey, setApiKey] = useState("");
+  const router = useRouter();
   const { user } = useAuthStore()
   const queryClient = useQueryClient();
   useEffect(() => {
@@ -54,11 +46,9 @@ export default function BrandOnboarding() {
 
 
   const createBrandProfile = trpc.profile.createBrandProfile.useMutation({
-    onSuccess: (res) => {
-      setApiKey(res.apiKey);
-      setDialogOpen(true);
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
-
+      router.push(`/brand/${data.slug}`)
     },
     onError: (err) => {
 
@@ -93,7 +83,7 @@ export default function BrandOnboarding() {
     <>
       <div className="min-h-screen w-full flex items-center justify-center px-4 py-16 bg-primary/10">
 
-        <div className="w-full max-w-3xl bg-white rounded-3xl border p-10 md:p-14 space-y-12">
+        <div className="w-full max-w-3xl bg-white/30 rounded-3xl border p-10 md:p-14 space-y-12">
           <div className="text-center space-y-2">
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
               Set Up Your Brand Profile
@@ -217,7 +207,7 @@ export default function BrandOnboarding() {
 
 
       {/* SUCCESS MODAL WITH API KEY */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Your Brand Profile is Ready</DialogTitle>
@@ -255,7 +245,7 @@ export default function BrandOnboarding() {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </>
   );
 }

@@ -93,7 +93,7 @@ export default function SignupPage() {
               Create Your Account
             </h2>
             <p className="text-muted-foreground text-sm md:text-base">
-              Enter your details to continue.
+              Enter your details to create your account.
             </p>
           </div>
 

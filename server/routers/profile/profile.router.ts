@@ -1,5 +1,4 @@
 import {
-  addCreatorPlatform,
   createBrandProfile,
   createCreatorProfileSchema,
   updateBrandProfile,
@@ -10,7 +9,6 @@ import {
   generateUniqueBrandSlug,
   generateUniqueCreatorSlug,
 } from "@/server/utils/slugify";
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { generateApiKey, hashApiKey } from "@/lib/tools";
 
@@ -55,8 +53,8 @@ export const profileRouter = router({
           });
         }
 
-        const rawApiKey = generateApiKey();
-        const hashedApiKey = hashApiKey(rawApiKey);
+        // const rawApiKey = generateApiKey();
+        // const hashedApiKey = hashApiKey(rawApiKey);
 
         await prisma.brandProfile.create({
           data: {
@@ -67,14 +65,13 @@ export const profileRouter = router({
             contactEmail,
             slug,
             userId: userId,
-            apiKey: hashedApiKey,
           },
         });
 
         return {
           success: true,
           message: "Your brand profile is now set up.",
-          apiKey: rawApiKey,
+          slug
         };
       } catch (err) {
         if (err instanceof TRPCError) throw err;
@@ -224,107 +221,7 @@ export const profileRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
-
-  addCreatorPlatform: protectedProcedure
-    .input(addCreatorPlatform)
-    .mutation(async ({ ctx, input }) => {
-      try {
-        const userId = ctx.userId;
-        const prisma = ctx.prisma;
-
-        const creator = await prisma.creatorProfile.findUnique({
-          where: {
-            userId,
-          },
-        });
-
-        if (!creator) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Creator profile not found.",
-          });
-        }
-        const existing = await prisma.creatorPlatform.findFirst({
-          where: {
-            creatorId: creator.id,
-            platform: input.platform,
-          },
-        });
-
-        if (existing) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "You already added this platform.",
-          });
-        }
-        await prisma.creatorPlatform.create({
-          data: {
-            creatorId: creator.id,
-            username: input.username,
-            followers: input.followers,
-            platform: input.platform,
-            url: input.url,
-          },
-        });
-        return {
-          success: true,
-          message: "Added this platform.",
-        };
-      } catch (err) {
-        if (err instanceof TRPCError) throw err;
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-  deleteCreatorPlatform: protectedProcedure
-    .input(
-      z.object({
-        platformId: z.number(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        const userId = ctx.userId;
-
-        const prisma = ctx.prisma;
-
-        const creator = await prisma.creatorProfile.findUnique({
-          where: { userId },
-        });
-
-        if (!creator) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Creator profile not found.",
-          });
-        }
-
-        const existing = await prisma.creatorPlatform.findFirst({
-          where: {
-            creatorId: creator.id,
-            id: input.platformId,
-          },
-        });
-
-        if (!existing) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "This platform is not added yet.",
-          });
-        }
-        await prisma.creatorPlatform.delete({
-          where: { id: existing.id },
-        });
-
-        return {
-          success: true,
-          message: "Platform removed.",
-        };
-      } catch (err) {
-        if (err instanceof TRPCError) throw err;
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-  regenerateAPIKey: brandProcedure.mutation(async ({ ctx }) => {
+  generateAPIKey: brandProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.userId;
 
     try {

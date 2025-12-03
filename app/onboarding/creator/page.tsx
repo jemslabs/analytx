@@ -30,9 +30,9 @@ function CreatorOnboarding() {
     niche: "OTHER"
   });
   const createCreatorProfile = trpc.profile.createCreatorProfile.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/dashboard");
+      router.push(`/creator/${data.data.slug}`);
     },
     onError: (err) => {
 
@@ -45,7 +45,7 @@ function CreatorOnboarding() {
   }
   return (
     <><div className="min-h-screen w-full flex items-center justify-center px-4 py-16 bg-primary/10">
-      <div className="w-full max-w-3xl bg-white rounded-3xl border p-10 md:p-14 space-y-12">
+      <div className="w-full max-w-3xl bg-white/30 rounded-3xl border p-10 md:p-14 space-y-12">
         <div className="text-center space-y-2">
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
             Set Up Your Creator Profile

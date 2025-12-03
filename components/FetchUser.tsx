@@ -26,49 +26,69 @@ export default function FetchUser() {
   });
 
   useEffect(() => {
-    // Wait until query finishes
     if (isLoading) return;
 
-    // Sync Zustand
     if (!user && serverUser) setUser(serverUser);
     setIsUserLoading(false);
 
-    // 1️⃣ Not logged in
+    // Not logged in → redirect to login
+    // Not logged in → allow login & signup pages
     if (!user && !serverUser) {
-      if (!pathname.startsWith("/login") && !pathname.startsWith("/signup")) {
+      if (
+        !pathname.startsWith("/login") &&
+        !pathname.startsWith("/signup")
+      ) {
         router.replace("/login");
       }
       return;
     }
 
+
     const currentUser = user || serverUser;
 
-    // 2️⃣ Skip login/signup pages
-    if (pathname.startsWith("/login") || pathname.startsWith("/signup")) return;
+    // Allow public pages
+    if (
+      pathname.startsWith("/login") ||
+      pathname.startsWith("/signup") ||
+      pathname === "/" ||
+      pathname.startsWith("/pricing") ||
+      pathname.startsWith("/docs")
+    ) {
+      return;
+    }
 
-    // 3️⃣ BRAND logic
+    // BRAND
     if (currentUser.role === "BRAND") {
-      if (!currentUser.brandProfile && !pathname.startsWith("/onboarding/brand")) {
-        router.replace("/onboarding/brand");
+      if (!currentUser.brandProfile) {
+        if (!pathname.startsWith("/onboarding/brand")) {
+          router.replace("/onboarding/brand");
+        }
         return;
       }
-      if (currentUser.brandProfile && !pathname.startsWith("/dashboard")) {
-        router.replace("/dashboard");
-        return;
+
+      const base = `/brand/${currentUser.brandProfile.slug}`;
+      if (!pathname.startsWith(base)) {
+        router.replace(base);
       }
+      return;
     }
 
-    // 4️⃣ CREATOR logic
+    // CREATOR
     if (currentUser.role === "CREATOR") {
-      if (!currentUser.creatorProfile && !pathname.startsWith("/onboarding/creator")) {
-        router.replace("/onboarding/creator");
+      if (!currentUser.creatorProfile) {
+        if (!pathname.startsWith("/onboarding/creator")) {
+          router.replace("/onboarding/creator");
+        }
         return;
       }
-      if (currentUser.creatorProfile && !pathname.startsWith("/dashboard")) {
-        router.replace("/dashboard");
-        return;
+
+      const base = `/creator/${currentUser.creatorProfile.slug}`;
+      if (!pathname.startsWith(base)) {
+        router.replace(base);
       }
+      return;
     }
+
   }, [user, serverUser, isLoading, pathname, router]);
 
   return null;

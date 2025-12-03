@@ -65,7 +65,7 @@ export default function LoginPage() {
       } else if (afterLoginData.role === "CREATOR" && afterLoginData.creatorProfile === null) {
         router.push("/onboarding/creator")
       } else {
-        router.push("/dashboard")
+        router.push(`/${afterLoginData.role === "CREATOR" ? "creator" : "brand"}/${afterLoginData.role === "CREATOR" ? afterLoginData.creatorProfile?.slug: afterLoginData.brandProfile?.slug}`)
       }
     } catch {
       toast.error("Something went wrong. Please try again.")
@@ -85,7 +85,7 @@ export default function LoginPage() {
               Welcome Back
             </h2>
             <p className="text-muted-foreground text-sm md:text-base">
-              Enter your email and password to access your account.
+              Enter your details to access your account.
             </p>
           </div>
 
