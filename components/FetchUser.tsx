@@ -17,6 +17,11 @@ export default function FetchUser() {
       const res = await axios.get("/api/auth/user");
       return res.data;
     },
+    retry: 1,
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
     staleTime: 5 * 60 * 1000,
   });
 
