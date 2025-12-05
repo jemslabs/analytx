@@ -22,15 +22,17 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 export default function BrandSidebar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false);
   const navItems = [
     { label: "Overview", icon: LayoutDashboard, href: `/brand` },
     { label: "Campaigns", icon: Flag, href: `/brand/campaigns` },
     { label: "Products", icon: ShoppingBag, href: `/brand/products` },
-    { label: "API Access", icon: Key, href: `/brand/api-key` },
+    { label: "API Access", icon: Key, href: `/brand/api-access` },
     { label: "Settings", icon: Settings, href: `/brand/settings` },
   ];
+
+
 
   return (
     <aside
@@ -141,6 +143,7 @@ export default function BrandSidebar() {
 
             <DropdownMenuItem
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium  hover:bg-red-50 transition cursor-pointer"
+              onClick={()=>logout()}
             >
               <LogOut className="h-4 w-4" />
               Logout

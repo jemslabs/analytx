@@ -43,9 +43,9 @@ export type useAuthStoreType = {
   isUserLoading: boolean;
   signup: (data: signupType) => Promise<userType | null>;
   login: (data: loginType) => Promise<userType | null>;
-
+  logout: () => void;
   setUser: (user: userType) => void;
-  setIsUserLoading: (value: boolean) => void
+  setIsUserLoading: (value: boolean) => void;
 };
 
 export type IndustryCategoryType =

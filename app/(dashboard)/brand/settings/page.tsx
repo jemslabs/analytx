@@ -91,7 +91,7 @@ function BrandSettings() {
                 </div>
             </div>
 
-            <form className="space-y-5" onSubmit={onSubmit}>
+            <form className="space-y-5 p-5 rounded-xl bg-white shadow-sm" onSubmit={onSubmit}>
                 <div>
                     <Label className="text-sm font-medium mb-2">Name</Label>
                     <Input
@@ -167,6 +167,7 @@ function BrandSettings() {
                 <Button type="submit" disabled={updateBrandProfile.isPending}>
                     {updateBrandProfile.isPending ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
+
                     ) : (
                         "Save Changes"
                     )}

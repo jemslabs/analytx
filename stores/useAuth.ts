@@ -3,10 +3,32 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useAuthStoreType } from "@/lib/types";
 
-const useAuthStore = create<useAuthStoreType>((set, get) => ({
+const useAuthStore = create<useAuthStoreType>((set) => ({
   user: null,
   isUserLoading: true,
-
+  logout: async () => {
+    try {
+      const res = await axios.post("/api/auth/logout");
+      if (res.status === 200) {
+        toast.success(res.data.msg);
+        set({
+          user: null,
+          isUserLoading: false, // recommended
+        });
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMsg =
+          error.response?.data?.msg ||
+          "Something went wrong. Please try again.";
+        toast.error(errorMsg);
+        return null;
+      } else {
+        toast.error("An unexpected error occurred.");
+        return null;
+      }
+    }
+  },
   signup: async (data) => {
     try {
       const res = await axios.post("/api/auth/signup", data);

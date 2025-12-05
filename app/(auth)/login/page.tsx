@@ -65,7 +65,7 @@ export default function LoginPage() {
       } else if (afterLoginData.role === "CREATOR" && afterLoginData.creatorProfile === null) {
         router.push("/onboarding/creator")
       } else {
-        router.push(`/${afterLoginData.role === "CREATOR" ? "creator" : "brand"}/${afterLoginData.role === "CREATOR" ? afterLoginData.creatorProfile?.slug: afterLoginData.brandProfile?.slug}`)
+        router.push(`/${afterLoginData.role === "CREATOR" ? "creator" : "brand"}`)
       }
     } catch {
       toast.error("Something went wrong. Please try again.")
