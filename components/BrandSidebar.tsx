@@ -3,20 +3,16 @@
 import {
   LayoutDashboard,
   Flag,
-  BarChart3,
-  Users2,
   ShoppingBag,
-  MousePointerClick,
-  CreditCard,
   Settings,
-  Mail,
   PanelLeftOpen,
   PanelLeftClose,
   ChevronsUpDown,
   LogOut,
+  Key,
 } from "lucide-react";
 
-import { useRouter, useParams, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -25,22 +21,15 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 
 export default function BrandSidebar() {
   const router = useRouter();
-  const params = useParams();
   const pathname = usePathname();
   const { user } = useAuthStore()
-  const slug = params?.slug as string;
-
   const [collapsed, setCollapsed] = useState(false);
-
   const navItems = [
-    { label: "Overview", icon: LayoutDashboard, href: `/brand/${slug}` },
-    { label: "Campaigns", icon: Flag, href: `/brand/${slug}/campaigns` },
-    { label: "Products", icon: ShoppingBag, href: `/brand/${slug}/products` },
-    { label: "Click Analytics", icon: MousePointerClick, href: `/brand/${slug}/analytics/clicks` },
-    { label: "Sales Analytics", icon: BarChart3, href: `/brand/${slug}/analytics/sales` },
-    { label: "Payouts", icon: CreditCard, href: `/brand/${slug}/finance` },
-    { label: "Invites", icon: Mail, href: `/brand/${slug}/invites` },
-    { label: "Settings", icon: Settings, href: `/brand/${slug}/settings` },
+    { label: "Overview", icon: LayoutDashboard, href: `/brand` },
+    { label: "Campaigns", icon: Flag, href: `/brand/campaigns` },
+    { label: "Products", icon: ShoppingBag, href: `/brand/products` },
+    { label: "API Access", icon: Key, href: `/brand/api-key` },
+    { label: "Settings", icon: Settings, href: `/brand/settings` },
   ];
 
   return (

@@ -5,10 +5,6 @@ import {
   updateCreatorProfileSchema,
 } from "@/server/utils/zod";
 import { router, protectedProcedure, brandProcedure } from "../../trpc";
-import {
-  generateUniqueBrandSlug,
-  generateUniqueCreatorSlug,
-} from "@/server/utils/slugify";
 import { TRPCError } from "@trpc/server";
 import { generateApiKey, hashApiKey } from "@/lib/tools";
 
@@ -40,7 +36,6 @@ export const profileRouter = router({
         }
 
         const { name, websiteUrl, industry, description, contactEmail } = input;
-        const slug = await generateUniqueBrandSlug(prisma, name);
 
         const existing = await prisma.brandProfile.findUnique({
           where: { userId },
@@ -53,9 +48,6 @@ export const profileRouter = router({
           });
         }
 
-        // const rawApiKey = generateApiKey();
-        // const hashedApiKey = hashApiKey(rawApiKey);
-
         await prisma.brandProfile.create({
           data: {
             name,
@@ -63,7 +55,6 @@ export const profileRouter = router({
             industry,
             description,
             contactEmail,
-            slug,
             userId: userId,
           },
         });
@@ -71,7 +62,6 @@ export const profileRouter = router({
         return {
           success: true,
           message: "Your brand profile is now set up.",
-          slug
         };
       } catch (err) {
         if (err instanceof TRPCError) throw err;
@@ -96,20 +86,10 @@ export const profileRouter = router({
           });
         }
 
-        let slug = existing.slug;
-        if (
-          input.name &&
-          input.name.trim().toLowerCase() !== existing.name.trim().toLowerCase()
-        ) {
-          slug = await generateUniqueBrandSlug(prisma, input.name);
-        }
 
         const updated = await prisma.brandProfile.update({
           where: { id: existing.id },
-          data: {
-            ...input,
-            slug,
-          },
+          data: input,
         });
         return {
           success: true,
@@ -159,13 +139,10 @@ export const profileRouter = router({
 
         const { name, bio, niche } = input;
 
-        const slug = await generateUniqueCreatorSlug(prisma, name);
-
         const profile = await prisma.creatorProfile.create({
           data: {
             userId,
             name,
-            slug,
             bio,
             niche,
           },
@@ -198,17 +175,10 @@ export const profileRouter = router({
             message: "Creator profile not found.",
           });
         }
-        let slug = existing.slug;
-        if (input.name && input.name !== existing.name) {
-          slug = await generateUniqueCreatorSlug(prisma, input.name);
-        }
 
         const updated = await prisma.creatorProfile.update({
           where: { id: existing.id },
-          data: {
-            ...input,
-            slug,
-          },
+          data: input
         });
 
         return {

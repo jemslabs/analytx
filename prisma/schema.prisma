@@ -24,7 +24,6 @@ model BrandProfile {
   userId       Int              @unique
   user         User             @relation(fields: [userId], references: [id])
   name         String
-  slug         String           @unique
   description  String?
   industry     IndustryCategory @default(OTHER)
   websiteUrl   String?
@@ -41,7 +40,6 @@ model CreatorProfile {
   userId    Int               @unique
   user      User              @relation(fields: [userId], references: [id])
   name      String
-  slug      String            @unique
   bio       String?
   niche     CreatorNiche
   campaigns CampaignMember[]

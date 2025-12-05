@@ -32,7 +32,7 @@ function CreatorOnboarding() {
   const createCreatorProfile = trpc.profile.createCreatorProfile.useMutation({
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push(`/creator/${data.data.slug}`);
+      router.push(`/creator`);
     },
     onError: (err) => {
 

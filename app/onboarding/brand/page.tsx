@@ -46,9 +46,9 @@ export default function BrandOnboarding() {
 
 
   const createBrandProfile = trpc.profile.createBrandProfile.useMutation({
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push(`/brand/${data.slug}`)
+      router.push(`/brand`)
     },
     onError: (err) => {
 

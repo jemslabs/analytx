@@ -66,7 +66,7 @@ export default function FetchUser() {
         return;
       }
 
-      const base = `/brand/${currentUser.brandProfile.slug}`;
+      const base = `/brand`;
       if (!pathname.startsWith(base)) {
         router.replace(base);
       }
@@ -82,7 +82,7 @@ export default function FetchUser() {
         return;
       }
 
-      const base = `/creator/${currentUser.creatorProfile.slug}`;
+      const base = `/creator`;
       if (!pathname.startsWith(base)) {
         router.replace(base);
       }

@@ -10,10 +10,10 @@ export default function Home() {
       <Link href={"/login"}>
       <Button>Login</Button>
       </Link>
-      <Link href={"/onboarding/brand"}>
+      <Link href={"/brand"}>
       <Button>Brand</Button>
       </Link>
-      <Link href={"/onboarding/creator"}>
+      <Link href={"/creator"}>
       <Button>Creator</Button>
       </Link>
     </div>

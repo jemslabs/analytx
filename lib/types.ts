@@ -22,7 +22,6 @@ export type brandProfileType = {
   createdAt: Date;
   name: string;
   userId: number;
-  slug: string;
   description: string | null;
   industry: IndustryCategoryType;
   websiteUrl: string | null;
@@ -35,7 +34,6 @@ export type creatorProfileType = {
   createdAt: Date;
   name: string;
   userId: number;
-  slug: string;
   updatedAt: Date;
   bio: string | null;
   niche: CreatorNicheType;
