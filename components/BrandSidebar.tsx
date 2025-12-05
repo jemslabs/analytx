@@ -1,0 +1,165 @@
+"use client";
+
+import {
+  LayoutDashboard,
+  Flag,
+  BarChart3,
+  Users2,
+  ShoppingBag,
+  MousePointerClick,
+  CreditCard,
+  Settings,
+  Mail,
+  PanelLeftOpen,
+  PanelLeftClose,
+  ChevronsUpDown,
+  LogOut,
+} from "lucide-react";
+
+import { useRouter, useParams, usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import useAuthStore from "@/stores/useAuth";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+
+export default function BrandSidebar() {
+  const router = useRouter();
+  const params = useParams();
+  const pathname = usePathname();
+  const { user } = useAuthStore()
+  const slug = params?.slug as string;
+
+  const [collapsed, setCollapsed] = useState(false);
+
+  const navItems = [
+    { label: "Overview", icon: LayoutDashboard, href: `/brand/${slug}` },
+    { label: "Campaigns", icon: Flag, href: `/brand/${slug}/campaigns` },
+    { label: "Products", icon: ShoppingBag, href: `/brand/${slug}/products` },
+    { label: "Click Analytics", icon: MousePointerClick, href: `/brand/${slug}/analytics/clicks` },
+    { label: "Sales Analytics", icon: BarChart3, href: `/brand/${slug}/analytics/sales` },
+    { label: "Payouts", icon: CreditCard, href: `/brand/${slug}/finance` },
+    { label: "Invites", icon: Mail, href: `/brand/${slug}/invites` },
+    { label: "Settings", icon: Settings, href: `/brand/${slug}/settings` },
+  ];
+
+  return (
+    <aside
+      className={cn(
+        "h-screen bg-white/90 backdrop-blur-xl border-r border-gray-200 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] rounded-3xl flex flex-col transition-all duration-300 py-6 m-2",
+        collapsed ? "w-20 px-3" : "w-64 px-4"
+      )}
+    >
+
+      <nav className={cn("flex flex-col gap-2", collapsed && "items-center")}>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = pathname === item.href;
+
+          return (
+            <button
+              key={item.href}
+              onClick={() => router.push(item.href)}
+              className={cn(
+                "relative flex items-center gap-3 px-3 py-2 rounded-xl text-[15px] font-medium transition-all",
+                "cursor-pointer group w-full",
+
+                active
+                  ? "bg-black text-white shadow-sm scale-[1.02]"
+                  : "text-gray-700 hover:bg-primary/10",
+
+                collapsed && "justify-center px-0"
+              )}
+            >
+              {/* Icon wrapper */}
+              <span
+                className={cn(
+                  "p-2 rounded-lg transition-all flex items-center justify-center",
+                  active ? "bg-white/20" : "bg-gray-200 group-hover:bg-gray-300",
+                  collapsed && "p-2"
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "h-4 w-4 transition-all",
+                    active ? "text-white" : "text-gray-600"
+                  )}
+                />
+              </span>
+
+              {/* Label (hide when collapsed) */}
+              {!collapsed && (
+                <span className="whitespace-nowrap">{item.label}</span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className={cn(
+          "absolute top-1/2 -translate-y-1/2 -right-3 z-10 p-2 rounded-full shadow-md border bg-white hover:bg-gray-100 transition cursor-pointer"
+        )}
+      >
+        {collapsed ? (
+          <PanelLeftOpen className="h-4 w-4 text-gray-700" />
+        ) : (
+          <PanelLeftClose className="h-4 w-4 text-gray-700" />
+        )}
+      </button>
+
+      <div
+        className={cn(
+          "mt-auto",
+          collapsed && "flex justify-center"
+        )}
+      >
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              "group flex items-center px-3 py-2 rounded-xl text-[15px] font-medium cursor-pointer",
+              "bg-gray-100 hover:bg-gray-200 transition-all w-full",
+              collapsed && "justify-center px-2"
+            )}
+          >
+            {/* Left Section */}
+            <div className="flex items-center gap-3 min-w-0 h-12">
+              <Avatar>
+                <AvatarFallback className="bg-black text-white">{user?.email[0]}</AvatarFallback>
+              </Avatar>
+
+              {!collapsed && (
+                <span className="text-gray-800 truncate max-w-[140px] group-hover:text-gray-900">
+                  {user?.email}
+                </span>
+              )}
+            </div>
+
+            {/* Right Icon */}
+            {!collapsed && (
+              <ChevronsUpDown className="h-4 w-4 text-gray-600 shrink-0" />
+            )}
+          </DropdownMenuTrigger>
+
+
+
+
+          <DropdownMenuContent
+            side="right"
+            align="start"
+            className="w-48 mt-1 p-2 rounded-xl shadow-lg border bg-white"
+          >
+
+            <DropdownMenuItem
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium  hover:bg-red-50 transition cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+    </aside>
+  );
+}

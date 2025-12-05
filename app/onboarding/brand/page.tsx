@@ -204,48 +204,6 @@ export default function BrandOnboarding() {
       </div>
 
 
-
-
-      {/* SUCCESS MODAL WITH API KEY */}
-      {/* <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Your Brand Profile is Ready</DialogTitle>
-            <DialogDescription>
-              Copy and store your API key securely.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="mt-4 space-y-3">
-            <Label>Your API Key</Label>
-            <div className="flex items-center gap-2">
-              <Input value={apiKey} readOnly className="h-12" />
-              <Button
-                type="button"
-                variant="secondary"
-                className="h-12"
-                onClick={() => {
-                  navigator.clipboard.writeText(apiKey);
-                  toast.success("API key copied to clipboard");
-                }}
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-
-            </div>
-
-            <Button
-              className="w-full h-12 mt-4"
-              onClick={() => {
-                setDialogOpen(false);
-                window.location.href = "/dashboard";
-              }}
-            >
-              Go to Dashboard
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog> */}
     </>
   );
 }

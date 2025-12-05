@@ -34,10 +34,10 @@ export const productRouter = router({
           },
         });
 
-        return { success: true, message: "Product created successfully" };
-      } catch(err) {
+        return { success: true, message: "Product added successfully" };
+      } catch (err) {
         if (err instanceof TRPCError) throw err;
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
 
@@ -59,7 +59,7 @@ export const productRouter = router({
             message: "Brand profile not found",
           });
         }
-        const { productId, status, basePrice, name, productUrl } = input;
+        const { productId, status } = input;
         const product = await prisma.product.findUnique({
           where: {
             id: productId,
@@ -82,10 +82,7 @@ export const productRouter = router({
             id: productId,
           },
           data: {
-            basePrice,
-            name,
             status,
-            productUrl,
           },
         });
 
@@ -93,9 +90,38 @@ export const productRouter = router({
           success: true,
           message: "Product updated successfully",
         };
-      } catch(err) {
+      } catch (err) {
         if (err instanceof TRPCError) throw err;
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
+  getProducts: brandProcedure.query(async ({ ctx }) => {
+    const prisma = ctx.prisma;
+    const userId = ctx.userId;
+    try {
+      const brand = await prisma.brandProfile.findUnique({
+        where: {
+          userId,
+        },
+      });
+
+      if (!brand) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Brand profile not found",
+        });
+      }
+
+      const products = await prisma.product.findMany({
+        where: {
+          brandId: brand.id,
+        },
+      });
+
+      return { success: true, products: products };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
 });

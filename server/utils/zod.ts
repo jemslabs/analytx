@@ -52,9 +52,6 @@ export const createProductSchema = z.object({
 
 export const updateProductSchema = z.object({
   productId: z.number(),
-  name: z.string().optional(),
-  basePrice: z.number().positive().optional(),
-  productUrl: z.url().optional(),
   status: z.nativeEnum(ProductStatus),
 });
 
