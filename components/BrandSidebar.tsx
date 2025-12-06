@@ -2,7 +2,6 @@
 
 import {
   LayoutDashboard,
-  Flag,
   ShoppingBag,
   Settings,
   PanelLeftOpen,
@@ -10,6 +9,7 @@ import {
   ChevronsUpDown,
   LogOut,
   Key,
+  Megaphone,
 } from "lucide-react";
 
 import { useRouter, usePathname } from "next/navigation";
@@ -26,7 +26,7 @@ export default function BrandSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const navItems = [
     { label: "Overview", icon: LayoutDashboard, href: `/brand` },
-    { label: "Campaigns", icon: Flag, href: `/brand/campaigns` },
+    { label: "Campaigns", icon: Megaphone, href: `/brand/campaigns` },
     { label: "Products", icon: ShoppingBag, href: `/brand/products` },
     { label: "API Access", icon: Key, href: `/brand/api-access` },
     { label: "Settings", icon: Settings, href: `/brand/settings` },
@@ -45,7 +45,13 @@ export default function BrandSidebar() {
       <nav className={cn("flex flex-col gap-2", collapsed && "items-center")}>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href;
+
+          // Fix: match exact route OR first segment
+          const pathSegment = pathname.split("/")[2] ?? "";
+          const itemSegment = item.href.split("/")[2] ?? "";
+
+          const active =
+            pathname === item.href || pathSegment === itemSegment;
 
           return (
             <button
@@ -54,15 +60,12 @@ export default function BrandSidebar() {
               className={cn(
                 "relative flex items-center gap-3 px-3 py-2 rounded-xl text-[15px] font-medium transition-all",
                 "cursor-pointer group w-full",
-
                 active
                   ? "bg-black text-white shadow-sm scale-[1.02]"
                   : "text-gray-700 hover:bg-primary/10",
-
                 collapsed && "justify-center px-0"
               )}
             >
-              {/* Icon wrapper */}
               <span
                 className={cn(
                   "p-2 rounded-lg transition-all flex items-center justify-center",
@@ -78,7 +81,6 @@ export default function BrandSidebar() {
                 />
               </span>
 
-              {/* Label (hide when collapsed) */}
               {!collapsed && (
                 <span className="whitespace-nowrap">{item.label}</span>
               )}
@@ -86,6 +88,7 @@ export default function BrandSidebar() {
           );
         })}
       </nav>
+
       <button
         onClick={() => setCollapsed(!collapsed)}
         className={cn(
@@ -143,7 +146,7 @@ export default function BrandSidebar() {
 
             <DropdownMenuItem
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium  hover:bg-red-50 transition cursor-pointer"
-              onClick={()=>logout()}
+              onClick={() => logout()}
             >
               <LogOut className="h-4 w-4" />
               Logout
