@@ -23,7 +23,6 @@ export default function CreateCampaign() {
     const router = useRouter();
     const [data, setData] = useState<{
         name: string,
-        description: string,
         redirectUrl: string,
         payoutModel: "BOTH" | "CPS" | "CPC",
         cpsCommissionType: "PERCENTAGE" | "FIXED",
@@ -31,7 +30,6 @@ export default function CreateCampaign() {
         cpcValue: string
     }>({
         name: "",
-        description: "",
         redirectUrl: "",
         payoutModel: "BOTH", // CPS | CPC | BOTH
         cpsCommissionType: "PERCENTAGE", // PERCENTAGE | FIXED
@@ -60,6 +58,15 @@ export default function CreateCampaign() {
     const createCampaign = trpc.campaign.createCampaign.useMutation({
         onSuccess: (res) => {
             toast.success(res.message || "Campaign Created");
+            setData({
+
+                name: "",
+                redirectUrl: "",
+                payoutModel: "BOTH", // CPS | CPC | BOTH
+                cpsCommissionType: "PERCENTAGE", // PERCENTAGE | FIXED
+                cpsValue: "",
+                cpcValue: ""
+            })
         },
         onError: (err) => {
             toast.error(err.message || "Something went wrong");
@@ -120,20 +127,6 @@ export default function CreateCampaign() {
                             className="h-12 rounded-xl border-gray-300"
                         />
                     </div>
-
-                    <div className="space-y-1">
-                        <Label>
-                            Description <span className="text-red-600">*</span>
-                        </Label>
-                        <Textarea
-                            value={data.description}
-                            onChange={(e) => updateField("description", e.target.value)}
-                            placeholder="Short description of the campaign"
-                            required
-                            className="rounded-xl border border-gray-300"
-                        />
-                    </div>
-
                     <div className="space-y-1">
                         <Label>
                             Redirect URL <span className="text-red-600">*</span>

@@ -12,7 +12,7 @@ import {
 import { router, brandProcedure, creatorProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { generateUniqueReferralCode } from "@/lib/tools";
-
+import { z } from "zod";
 export const campaignRouter = router({
   createCampaign: brandProcedure
     .input(createCampaignSchema)
@@ -35,7 +35,6 @@ export const campaignRouter = router({
 
         const {
           name,
-          description,
           redirectUrl,
           payoutModel,
           cpsValue,
@@ -47,7 +46,6 @@ export const campaignRouter = router({
           data: {
             brandId: brand.id,
             name,
-            description,
             redirectUrl,
             payoutModel,
             cpsCommissionType,
@@ -57,6 +55,117 @@ export const campaignRouter = router({
         });
 
         return { success: true, message: "Campaign Created" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  getAllCampaigns: brandProcedure.query(async ({ ctx }) => {
+    const prisma = ctx.prisma;
+    const userId = ctx.userId;
+    try {
+      const brand = await prisma.brandProfile.findUnique({
+        where: {
+          userId,
+        },
+      });
+
+      if (!brand) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Brand profile not found",
+        });
+      }
+
+      const campaigns = await prisma.campaign.findMany({
+        where: {
+          brandId: brand.id,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return { success: true, data: campaigns };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
+  getCampaignOverview: brandProcedure
+    .input(z.object({ campaignId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+
+      try {
+        const brand = await prisma.brandProfile.findUnique({
+          where: { userId },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found",
+          });
+        }
+
+        // Validate campaign belongs to brand
+        const campaign = await prisma.campaign.findFirst({
+          where: {
+            id: input.campaignId,
+            brandId: brand.id,
+          },
+        });
+
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign not found",
+          });
+        }
+
+        // Fetch all aggregated stats
+        const [sales, clicks, revenue, creators, products] = await Promise.all([
+          prisma.saleEvent.count({
+            where: {
+              member: { campaignId: input.campaignId },
+            },
+          }),
+          prisma.clickEvent.count({
+            where: {
+              member: { campaignId: input.campaignId },
+            },
+          }),
+          prisma.saleEvent.aggregate({
+            _sum: { salePrice: true },
+            where: {
+              member: { campaignId: input.campaignId },
+            },
+          }),
+          prisma.campaignMember.count({
+            where: { campaignId: input.campaignId },
+          }),
+          prisma.campaignProduct.count({
+            where: { campaignId: input.campaignId },
+          }),
+        ]);
+
+        const totalRevenue = revenue._sum.salePrice ?? 0;
+
+        const conversionPercentage = clicks > 0 ? (sales / clicks) * 100 : 0;
+
+        return {
+          success: true,
+          data: {
+            sales,
+            clicks,
+            conversionPercentage,
+            revenue: totalRevenue,
+            creators,
+            products,
+            campaign: campaign
+          },
+        };
       } catch (err) {
         if (err instanceof TRPCError) throw err;
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });

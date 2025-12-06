@@ -36,13 +36,6 @@ export const updateCreatorProfileSchema = z.object({
   niche: z.nativeEnum(CreatorNiche).optional(),
 });
 
-export const addCreatorPlatform = z.object({
-  platform: z.nativeEnum(PlatformType),
-  username: z.string(),
-  url: z.url(),
-  followers: z.number(),
-});
-
 export const createProductSchema = z.object({
   name: z.string(),
   basePrice: z.number().positive(),
@@ -57,7 +50,6 @@ export const updateProductSchema = z.object({
 
 export const createCampaignSchema = z.object({
   name: z.string(),
-  description: z.string().optional(),
   redirectUrl: z.url(),
   payoutModel: z.nativeEnum(PayoutModel),
   cpsCommissionType: z.nativeEnum(CommissionType),

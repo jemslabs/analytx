@@ -70,8 +70,6 @@ model Campaign {
   brandId     Int
   brand       BrandProfile @relation(fields: [brandId], references: [id])
   name        String
-  description String?
-
   status      CampaignStatus @default(DRAFT)
   redirectUrl String
 
