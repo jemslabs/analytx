@@ -2,14 +2,13 @@
 
 import {
   LayoutDashboard,
-  ShoppingBag,
   Settings,
   PanelLeftOpen,
   PanelLeftClose,
   ChevronsUpDown,
   LogOut,
-  Key,
   Megaphone,
+  Inbox,
 } from "lucide-react";
 
 import { useRouter, usePathname } from "next/navigation";
@@ -19,17 +18,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import useAuthStore from "@/stores/useAuth";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
-export default function BrandSidebar() {
+export default function CreatorSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false);
   const navItems = [
-    { label: "Overview", icon: LayoutDashboard, href: `/brand` },
-    { label: "Campaigns", icon: Megaphone, href: `/brand/campaigns` },
-    { label: "Products", icon: ShoppingBag, href: `/brand/products` },
-    { label: "API Access", icon: Key, href: `/brand/api-access` },
-    { label: "Settings", icon: Settings, href: `/brand/settings` },
+    { label: "Overview", icon: LayoutDashboard, href: `/creator` },
+    { label: "Campaigns", icon: Megaphone, href: `/creator/campaigns` },
+    { label: "Invites", icon: Inbox, href: `/creator/invites` },
+    { label: "Settings", icon: Settings, href: `/creator/settings` },
   ];
 
 

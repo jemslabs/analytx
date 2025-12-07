@@ -591,12 +591,12 @@ export const campaignRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
-  acceptCampaignInvite: creatorProcedure
-    .input(acceptCampaignInviteSchema)
-    .mutation(async ({ ctx, input }) => {
-      const prisma = ctx.prisma;
-      const userId = ctx.userId;
 
+  getMyCampaignInvites: creatorProcedure.query(async ({ ctx }) => {
+    const prisma = ctx.prisma;
+    const userId = ctx.userId;
+
+    try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: { creatorProfile: true },
@@ -608,96 +608,146 @@ export const campaignRouter = router({
           message: "User not found.",
         });
       }
-      const creator = user.creatorProfile;
-      if (!creator) {
+
+      if (!user.creatorProfile) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "You must be a creator to accept invites.",
+          message: "You must be a creator to access invites.",
         });
       }
-
-      const invite = await prisma.campaignInvite.findUnique({
-        where: { id: input.campaignInviteId },
-      });
-
-      if (!invite) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Campaign Invite not found.",
-        });
-      }
-
-      if (invite.status !== "PENDING") {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Campaign Invite is not pending.",
-        });
-      }
-
-      if (invite.email !== user?.email) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You are not invited to join this campaign.",
-        });
-      }
-
-      const campaign = await prisma.campaign.findUnique({
-        where: {
-          id: invite.campaignId,
-        },
-      });
-
-      if (!campaign) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Campaign not found",
-        });
-      }
-      if (campaign.status !== "DRAFT") {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Cannot join this campaign",
-        });
-      }
-
-      // Ensure user is not already a member
-      const existingMember = await prisma.campaignMember.findUnique({
-        where: {
-          campaignId_creatorId: {
-            campaignId: invite.campaignId,
-            creatorId: creator.id,
+      const invites = await prisma.campaignInvite.findMany({
+        where: { email: user.email },
+        include: {
+          campaign: {
+            select: {
+              id: true,
+              name: true,
+              brand: {
+                select: { name: true },
+              },
+            },
           },
         },
+        orderBy: { createdAt: "desc" },
       });
+      return { success: true, invites };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
+  acceptCampaignInvite: creatorProcedure
+    .input(acceptCampaignInviteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
 
-      if (existingMember) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "You are already part of this campaign.",
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { creatorProfile: true },
         });
-      }
 
-      // Transaction
-      return await prisma.$transaction(async (tx) => {
-        // Accept invite
-        await tx.campaignInvite.update({
-          where: { id: invite.id },
-          data: { status: "ACCEPTED" },
+        if (!user) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found.",
+          });
+        }
+        const creator = user.creatorProfile;
+        if (!creator) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be a creator to accept invites.",
+          });
+        }
+
+        const invite = await prisma.campaignInvite.findUnique({
+          where: { id: input.campaignInviteId },
         });
 
-        // Add member
-        await tx.campaignMember.create({
-          data: {
-            campaignId: invite.campaignId,
-            creatorId: creator.id,
+        if (!invite) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign Invite not found.",
+          });
+        }
+
+        if (invite.status !== "PENDING") {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Campaign Invite is not pending.",
+          });
+        }
+
+        if (invite.email !== user?.email) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You are not invited to join this campaign.",
+          });
+        }
+
+        const campaign = await prisma.campaign.findUnique({
+          where: {
+            id: invite.campaignId,
           },
         });
 
-        return {
-          success: true,
-          message: "Invite accepted. You are now a campaign member.",
-        };
-      });
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign not found",
+          });
+        }
+        if (campaign.status !== "DRAFT") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cannot join this campaign",
+          });
+        }
+
+        // Ensure user is not already a member
+        const existingMember = await prisma.campaignMember.findUnique({
+          where: {
+            campaignId_creatorId: {
+              campaignId: invite.campaignId,
+              creatorId: creator.id,
+            },
+          },
+        });
+
+        if (existingMember) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "You are already part of this campaign.",
+          });
+        }
+
+        // Transaction
+        return await prisma.$transaction(async (tx) => {
+          // Accept invite
+          await tx.campaignInvite.update({
+            where: { id: invite.id },
+            data: { status: "ACCEPTED" },
+          });
+
+          // Add member
+          await tx.campaignMember.create({
+            data: {
+              campaignId: invite.campaignId,
+              creatorId: creator.id,
+            },
+          });
+
+          return {
+            success: true,
+            message: "Invite accepted. You are now a campaign member.",
+          };
+        });
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
     }),
 
   createReferralCode: creatorProcedure

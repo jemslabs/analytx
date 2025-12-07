@@ -6,7 +6,7 @@ import { useAuthStoreType } from "@/lib/types";
 const useAuthStore = create<useAuthStoreType>((set) => ({
   user: null,
   isUserLoading: true,
-  logout: async () => {
+  logout: async (router) => {
     try {
       const res = await axios.post("/api/auth/logout");
       if (res.status === 200) {
@@ -15,6 +15,7 @@ const useAuthStore = create<useAuthStoreType>((set) => ({
           user: null,
           isUserLoading: false, // recommended
         });
+        router.push("/login")
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {

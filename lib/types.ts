@@ -1,3 +1,5 @@
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 export type signupType = {
   email: String;
   password: String;
@@ -43,7 +45,7 @@ export type useAuthStoreType = {
   isUserLoading: boolean;
   signup: (data: signupType) => Promise<userType | null>;
   login: (data: loginType) => Promise<userType | null>;
-  logout: () => void;
+  logout: (router: AppRouterInstance) => void;
   setUser: (user: userType) => void;
   setIsUserLoading: (value: boolean) => void;
 };
