@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import Products from "../_components/Products";
+import Invites from "../_components/Invites";
 
 const Overview = dynamic(() => import("../_components/Overview"), {
     ssr: false,
@@ -35,7 +37,7 @@ function BrandCampaign() {
 
             <div>
                 <Tabs className="mt-2" defaultValue="overview">
-                    <TabsList>
+                    <TabsList className="gap-2">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="products">Products</TabsTrigger>
                         <TabsTrigger value="creators">Creators</TabsTrigger>
@@ -46,6 +48,12 @@ function BrandCampaign() {
 
                     <TabsContent value="overview">
                         <Overview campaignId={campaignId} />
+                    </TabsContent>
+                    <TabsContent value="products">
+                        <Products campaignId={campaignId}/>
+                    </TabsContent>
+                    <TabsContent value="invites">
+                        <Invites campaignId={campaignId}/>
                     </TabsContent>
                 </Tabs>
             </div>

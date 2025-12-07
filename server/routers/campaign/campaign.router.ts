@@ -82,6 +82,14 @@ export const campaignRouter = router({
         where: {
           brandId: brand.id,
         },
+        include: {
+          _count: {
+            select: {
+              products: true,
+              members: true,
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       });
 
@@ -163,7 +171,7 @@ export const campaignRouter = router({
             revenue: totalRevenue,
             creators,
             products,
-            campaign: campaign
+            campaign: campaign,
           },
         };
       } catch (err) {
@@ -329,6 +337,63 @@ export const campaignRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
+  getCampaignProducts: brandProcedure
+    .input(
+      z.object({
+        campaignId: z.number(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+      try {
+        const brand = await prisma.brandProfile.findUnique({
+          where: {
+            userId,
+          },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found",
+          });
+        }
+        const campaign = await prisma.campaign.findUnique({
+          where: {
+            id: input.campaignId,
+          },
+        });
+
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign does not exist.",
+          });
+        }
+
+        if (campaign.brandId !== brand.id) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You do not have permission to access this campaign.",
+          });
+        }
+
+        const campaignProducts = await prisma.campaignProduct.findMany({
+          where: {
+            campaignId: campaign.id,
+          },
+          include: {
+            product: true,
+          },
+        });
+
+        return { success: true, products: campaignProducts };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
   removeProductFromCampaign: brandProcedure
     .input(removeProductFromCampaignSchema)
     .mutation(async ({ ctx, input }) => {
@@ -467,6 +532,60 @@ export const campaignRouter = router({
           success: true,
           message: `Invite Sent to ${input.email}`,
         };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+  getCampaignInvites: brandProcedure
+    .input(
+      z.object({
+        campaignId: z.number(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+      try {
+        const brand = await prisma.brandProfile.findUnique({
+          where: {
+            userId,
+          },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found",
+          });
+        }
+        const campaign = await prisma.campaign.findUnique({
+          where: {
+            id: input.campaignId,
+          },
+        });
+
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign does not exist.",
+          });
+        }
+
+        if (campaign.brandId !== brand.id) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You do not have permission to access this campaign.",
+          });
+        }
+
+        const campaignInvites = await prisma.campaignInvite.findMany({
+          where: {
+            campaignId: campaign.id,
+          },
+        });
+
+        return { success: true, invites: campaignInvites };
       } catch (err) {
         if (err instanceof TRPCError) throw err;
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });

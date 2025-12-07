@@ -115,14 +115,14 @@ function BrandCampaigns() {
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
                                             <div className="flex items-center gap-1 text-gray-700">
-                                                <Package className="h-4 w-4" /> 0
+                                                <Package className="h-4 w-4" /> {campaign._count.products}
                                             </div>
 
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-900">
 
                                             <div className="flex items-center gap-1 text-gray-700">
-                                                <Users className="h-4 w-4" /> 0
+                                                <Users className="h-4 w-4" /> {campaign._count.members}
                                             </div>
                                         </td>
 
