@@ -43,7 +43,6 @@ function BrandCampaign() {
                         <TabsTrigger value="creators">Creators</TabsTrigger>
                         <TabsTrigger value="invites">Invites</TabsTrigger>
                         <TabsTrigger value="performance">Performance</TabsTrigger>
-                        <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview">

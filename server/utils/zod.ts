@@ -57,10 +57,6 @@ export const createCampaignSchema = z.object({
   cpcValue: z.number(),
 });
 
-export const updateCampaignSchema = z.object({
-  campaignId: z.number(),
-  redirectUrl: z.url().optional(),
-});
 
 export const addProductInCampaignSchema = z.object({
   productId: z.number(),
