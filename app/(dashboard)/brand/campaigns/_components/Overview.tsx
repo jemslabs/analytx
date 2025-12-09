@@ -11,6 +11,7 @@ import {
   Megaphone,
   Play,
   CheckCircle,
+  PenLine,
 } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -18,6 +19,10 @@ import { trpc } from "@/app/_trpc/trpc";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+
 
 function StatCard({
   title,
@@ -71,6 +76,14 @@ export default function Overview({ campaignId }: { campaignId: number }) {
     },
     onError: (err) => toast.error(err.message),
   });
+  const updateCampaign = trpc.campaign.updateCampaign.useMutation({
+    onSuccess: (res) => {
+      toast.success(res.message);
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
 
   if (isLoading) return <div>Loading...</div>;
   if (!data) return <div>No data found.</div>;
@@ -78,6 +91,9 @@ export default function Overview({ campaignId }: { campaignId: number }) {
   const overview = data.data;
   const campaign = overview.campaign;
 
+  const [editOpen, setEditOpen] = useState(false);
+  const [editedName, setEditedName] = useState(campaign.name);
+  const [editedUrl, setEditedUrl] = useState(campaign.redirectUrl);
   return (
     <div className="space-y-8">
       {/* STATS GRID */}
@@ -108,11 +124,26 @@ export default function Overview({ campaignId }: { campaignId: number }) {
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Campaign Details
-            </CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                Campaign Details
+              </CardTitle>
+              <Button
+                onClick={() => {
+                  setEditedName(campaign.name);
+                  setEditedUrl(campaign.redirectUrl);
+                  setEditOpen(true);
+                }}
+                className="px-3 py-1"
+              >
+                Edit
+              </Button>
+            </div>
+
             <Megaphone className="h-5 w-5 text-gray-800" />
           </CardHeader>
+
+
 
           <CardContent className="text-sm space-y-5 text-gray-700">
             <Detail label="Name" value={campaign.name} />
@@ -232,6 +263,58 @@ export default function Overview({ campaignId }: { campaignId: number }) {
         </Card>
 
       </div>
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Campaign</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            <div>
+              <p className="text-sm font-medium text-gray-700">Campaign Name</p>
+              <Input
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                placeholder="Campaign Name"
+              />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-700">Redirect URL</p>
+              <Input
+                value={editedUrl}
+                onChange={(e) => setEditedUrl(e.target.value)}
+                placeholder="https://example.com"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4 flex gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setEditOpen(false)}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              onClick={() => {
+                updateCampaign.mutate({
+                  campaignId,
+                  name: editedName,
+                  redirectUrl: editedUrl,
+                });
+
+                setEditOpen(false);
+              }}
+              disabled={updateCampaign.isPending}
+            >
+              {updateCampaign.isPending ? "Updating..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

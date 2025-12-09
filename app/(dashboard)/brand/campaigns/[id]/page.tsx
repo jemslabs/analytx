@@ -26,6 +26,7 @@ function BrandCampaign() {
 
     return (
         <div>
+            <div>
             <Button
                 type="button"
                 variant="ghost"
@@ -35,9 +36,9 @@ function BrandCampaign() {
                 <ChevronLeft className="w-4 h-4" /> Back to Campaigns
             </Button>
 
-            <div>
+
                 <Tabs className="mt-2" defaultValue="overview">
-                    <TabsList className="gap-2">
+                    <TabsList className="gap-2 ">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="products">Products</TabsTrigger>
                         <TabsTrigger value="creators">Creators</TabsTrigger>

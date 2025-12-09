@@ -57,35 +57,38 @@ export const createCampaignSchema = z.object({
   cpcValue: z.number(),
 });
 
+export const updateCampaignSchema = z.object({
+  campaignId: z.number(),
+  name: z.string().optional(),
+  redirectUrl: z.url().optional(),
+});
 
 export const addProductInCampaignSchema = z.object({
   productId: z.number(),
-  campaignId: z.number()
-})
+  campaignId: z.number(),
+});
 export const removeProductFromCampaignSchema = z.object({
   campaignProductId: z.number(),
-})
+});
 
 export const sendCampaignInviteSchema = z.object({
   campaignId: z.number(),
-  email: z.email()
-})
+  email: z.email(),
+});
 
 export const acceptCampaignInviteSchema = z.object({
-  campaignInviteId: z.number()
-})
+  campaignInviteId: z.number(),
+});
 
 export const createReferralCodeSchema = z.object({
   campaignMemberId: z.number(),
-  platform: z.nativeEnum(PlatformType)
-})
-
+  platform: z.nativeEnum(PlatformType),
+});
 
 export const startCampaignSchema = z.object({
-  campaignId: z.number()
-})
+  campaignId: z.number(),
+});
 
 export const completeCampaignSchema = z.object({
-  campaignId: z.number()
-})
-
+  campaignId: z.number(),
+});

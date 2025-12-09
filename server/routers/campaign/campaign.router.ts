@@ -7,6 +7,7 @@ import {
   removeProductFromCampaignSchema,
   sendCampaignInviteSchema,
   startCampaignSchema,
+  updateCampaignSchema,
 } from "@/server/utils/zod";
 import { router, brandProcedure, creatorProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
@@ -60,6 +61,62 @@ export const campaignRouter = router({
       }
     }),
 
+  updateCampaign: brandProcedure
+    .input(updateCampaignSchema)
+    .mutation(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+      try {
+        const brand = await prisma.brandProfile.findUnique({
+          where: {
+            userId,
+          },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found",
+          });
+        }
+
+        const { campaignId, name, redirectUrl } = input;
+
+        const campaign = await prisma.campaign.findUnique({
+          where: {
+            id: campaignId,
+          },
+        });
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign not found",
+          });
+        }
+
+        if (campaign.brandId !== brand.id) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Unauthorized to modify this campaign",
+          });
+        }
+
+        await prisma.campaign.update({
+          where: {
+            id: campaign.id,
+          },
+          data: {
+            name,
+            redirectUrl,
+          },
+        });
+
+        return { success: true, message: "Campaign Updated" };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
   getAllCampaigns: brandProcedure.query(async ({ ctx }) => {
     const prisma = ctx.prisma;
     const userId = ctx.userId;
