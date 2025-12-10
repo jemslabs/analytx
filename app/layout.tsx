@@ -4,8 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import './globals.css'
 import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
-import FetchUser from "@/components/FetchUser";
 import { GlobalUserLoader } from "@/components/GlobalUserLoader";
+import ClientOnlyFetchUser from "@/components/ClientOnlyFetchUser";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,13 +27,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <FetchUser />
+          <ClientOnlyFetchUser />
           <GlobalUserLoader />
           {children}
         </QueryProvider>

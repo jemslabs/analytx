@@ -189,33 +189,35 @@ export const campaignRouter = router({
         }
 
         // Fetch all aggregated stats
-        const [sales, clicks, revenue, creators, products] = await Promise.all([
-          prisma.saleEvent.count({
-            where: {
-              member: { campaignId: input.campaignId },
-            },
-          }),
-          prisma.clickEvent.count({
-            where: {
-              member: { campaignId: input.campaignId },
-            },
-          }),
-          prisma.saleEvent.aggregate({
-            _sum: { salePrice: true },
-            where: {
-              member: { campaignId: input.campaignId },
-            },
-          }),
-          prisma.campaignMember.count({
-            where: { campaignId: input.campaignId },
-          }),
-          prisma.campaignProduct.count({
-            where: { campaignId: input.campaignId },
-          }),
-        ]);
+        const [sales, clicksAgg, revenue, creators, products] =
+          await Promise.all([
+            prisma.saleEvent.count({
+              where: {
+                member: { campaignId: input.campaignId },
+              },
+            }),
+
+            prisma.clickEvent.aggregate({
+              _sum: { count: true },
+              where: { member: { campaignId: input.campaignId } },
+            }),
+
+            prisma.saleEvent.aggregate({
+              _sum: { salePrice: true },
+              where: {
+                member: { campaignId: input.campaignId },
+              },
+            }),
+            prisma.campaignMember.count({
+              where: { campaignId: input.campaignId },
+            }),
+            prisma.campaignProduct.count({
+              where: { campaignId: input.campaignId },
+            }),
+          ]);
 
         const totalRevenue = revenue._sum.salePrice ?? 0;
-
+        const clicks = clicksAgg._sum.count ?? 0;
         const conversionPercentage = clicks > 0 ? (sales / clicks) * 100 : 0;
 
         return {
@@ -808,39 +810,38 @@ export const campaignRouter = router({
       }
     }),
 
-    getMyCampaigns: creatorProcedure.query(async ({ctx}) =>{
-      const prisma = ctx.prisma;
-      const userId = ctx.userId;
-      try {
-        const creatorProfile = await prisma.creatorProfile.findUnique({
-          where: {
-            userId
-          }
+  getMyCampaigns: creatorProcedure.query(async ({ ctx }) => {
+    const prisma = ctx.prisma;
+    const userId = ctx.userId;
+    try {
+      const creatorProfile = await prisma.creatorProfile.findUnique({
+        where: {
+          userId,
+        },
+      });
+
+      if (!creatorProfile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Your creator profile not found.",
         });
-
-        if (!creatorProfile) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Your creator profile not found.",
-          });
-        }
-
-        const campaigns = await prisma.campaignMember.findMany({
-          where: {
-            creatorId: creatorProfile.id
-          },
-          include: {
-            campaign: true
-          }
-        }) 
-
-
-        return {success: true, campaigns}
-      } catch (err) {
-        if (err instanceof TRPCError) throw err;
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
-    }),
+
+      const campaigns = await prisma.campaignMember.findMany({
+        where: {
+          creatorId: creatorProfile.id,
+        },
+        include: {
+          campaign: true,
+        },
+      });
+
+      return { success: true, campaigns };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
   generateReferralCode: creatorProcedure
     .input(generateReferralCodeSchema)
     .mutation(async ({ ctx, input }) => {
@@ -921,7 +922,6 @@ export const campaignRouter = router({
             memberId: member.id,
             code,
             platform,
-            campaignId: campaign.id
           },
         });
 
@@ -936,9 +936,13 @@ export const campaignRouter = router({
       }
     }),
 
-    getMyReferralCodes: creatorProcedure.input(z.object({
-      campaignMemberId: z.number()
-    })).query(async ({ctx, input})=>{
+  getMyReferralCodes: creatorProcedure
+    .input(
+      z.object({
+        campaignMemberId: z.number(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
       const userId = ctx.userId;
 
@@ -975,19 +979,16 @@ export const campaignRouter = router({
           });
         }
 
-
         const referralCodes = await prisma.referralCode.findMany({
           where: {
-            memberId: member.id
-          
+            memberId: member.id,
           },
           orderBy: { createdAt: "desc" },
-        })
-
+        });
 
         return {
           success: true,
-          referralCodes
+          referralCodes,
         };
       } catch (err) {
         if (err instanceof TRPCError) throw err;

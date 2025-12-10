@@ -82,12 +82,10 @@ model Campaign {
   cpsCommissionType CommissionType
   cpsValue          Float
   cpcValue          Float?
-
-  referralCodes ReferralCode[]
-  startedAt     DateTime?
-  completedAt   DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  startedAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 }
 
 model CampaignProduct {
@@ -135,13 +133,11 @@ model CampaignMember {
 }
 
 model ReferralCode {
-  id         Int            @id @default(autoincrement())
-  memberId   Int
-  member     CampaignMember @relation(fields: [memberId], references: [id])
-  campaignId Int
-  campaign   Campaign       @relation(fields: [campaignId], references: [id])
-  platform   PlatformType
-  code       String         @unique
+  id       Int            @id @default(autoincrement())
+  memberId Int
+  member   CampaignMember @relation(fields: [memberId], references: [id])
+  platform PlatformType
+  code     String         @unique
 
   createdAt DateTime @default(now())
 
@@ -162,12 +158,14 @@ model SaleEvent {
 }
 
 model ClickEvent {
-  id        Int            @id @default(autoincrement())
-  memberId  Int
-  ipAddress String?
-  member    CampaignMember @relation(fields: [memberId], references: [id])
-  platform  PlatformType
-  timestamp DateTime       @default(now())
+  id       Int            @id @default(autoincrement())
+  memberId Int
+  member   CampaignMember @relation(fields: [memberId], references: [id])
+  platform PlatformType
+  count    Int            @default(0)
+  date     DateTime
+
+  @@unique([memberId, platform, date])
 }
 
 enum UserRole {
