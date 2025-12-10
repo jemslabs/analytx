@@ -30,21 +30,21 @@ model BrandProfile {
   contactEmail String?
   products     Product[]
   campaigns    Campaign[]
-  apiKey       String?           @unique
+  apiKey       String?          @unique
   createdAt    DateTime         @default(now())
   updatedAt    DateTime?        @updatedAt
 }
 
 model CreatorProfile {
-  id        Int               @id @default(autoincrement())
-  userId    Int               @unique
-  user      User              @relation(fields: [userId], references: [id])
+  id        Int              @id @default(autoincrement())
+  userId    Int              @unique
+  user      User             @relation(fields: [userId], references: [id])
   name      String
   bio       String?
   niche     CreatorNiche
   campaigns CampaignMember[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model Product {
@@ -66,9 +66,9 @@ model Product {
 }
 
 model Campaign {
-  id          Int          @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   brandId     Int
-  brand       BrandProfile @relation(fields: [brandId], references: [id])
+  brand       BrandProfile   @relation(fields: [brandId], references: [id])
   name        String
   status      CampaignStatus @default(DRAFT)
   redirectUrl String
@@ -77,16 +77,17 @@ model Campaign {
   invites           CampaignInvite[]
   members           CampaignMember[]
   // CPS and CPC settings
-  currency Currency @default(INR)
+  currency          Currency          @default(INR)
   payoutModel       PayoutModel       @default(BOTH)
   cpsCommissionType CommissionType
   cpsValue          Float
   cpcValue          Float?
 
-  startedAt   DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  referralCodes ReferralCode[]
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model CampaignProduct {
@@ -134,12 +135,13 @@ model CampaignMember {
 }
 
 model ReferralCode {
-  id       Int            @id @default(autoincrement())
-  memberId Int
-  member   CampaignMember @relation(fields: [memberId], references: [id])
-
-  platform PlatformType
-  code     String       @unique
+  id         Int            @id @default(autoincrement())
+  memberId   Int
+  member     CampaignMember @relation(fields: [memberId], references: [id])
+  campaignId Int
+  campaign   Campaign       @relation(fields: [campaignId], references: [id])
+  platform   PlatformType
+  code       String         @unique
 
   createdAt DateTime @default(now())
 
@@ -212,7 +214,6 @@ enum PlatformType {
   WEBSITE
 }
 
-
 enum Currency {
   INR
 }
@@ -243,4 +244,3 @@ enum CommissionType {
   PERCENTAGE
   FIXED
 }
- 

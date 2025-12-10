@@ -921,6 +921,7 @@ export const campaignRouter = router({
             memberId: member.id,
             code,
             platform,
+            campaignId: campaign.id
           },
         });
 
