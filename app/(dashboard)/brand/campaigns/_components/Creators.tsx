@@ -48,8 +48,7 @@ function Creators({ campaignId }: { campaignId: number }) {
               <tr className="text-white text-left text-xs border-b bg-black">
                 <th className="py-3 px-4 font-medium">CREATOR</th>
                 <th className="py-3 px-4 font-medium">NICHE</th>
-                <th className="py-3 px-4 font-medium">TOTAL SALES</th>
-                <th className="py-3 px-4 font-medium">TOTAL CLICKS</th>
+                <th className="py-3 px-4 font-medium">Joined At</th>
                 <th className="py-3 px-4"></th>
               </tr>
             </thead>
@@ -67,10 +66,13 @@ function Creators({ campaignId }: { campaignId: number }) {
                   <td className="py-3 px-4 text-gray-600">
                     {c.creator.niche}
                   </td>
-
-                  <td className="py-3 px-4">{c._count.sales}</td>
-
-                  <td className="py-3 px-4">{c._count.clicks}</td>
+                  <td className="py-3 px-4 text-gray-600">
+                    {new Date(c.createdAt).toLocaleDateString("en-US", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </td>
 
                   <td
                     className="px-3 py-4 text-center cursor-pointer"

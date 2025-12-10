@@ -686,7 +686,6 @@ export const campaignRouter = router({
           },
           include: {
             creator: true,
-            _count: true,
           },
         });
 

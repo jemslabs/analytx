@@ -10,8 +10,8 @@ import {
   CalendarDays,
   Megaphone,
   Play,
-  CheckCircle,
   Pen,
+  Check,
 } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -34,24 +34,28 @@ function StatCard({
   icon: any;
 }) {
   return (
-    <Card
-      className={cn(
-        "rounded-3xl border border-gray-200 bg-white/90 backdrop-blur-xl",
-        "shadow-[0_4px_18px_-4px_rgba(0,0,0,0.08)] hover:shadow-xl transition-all duration-200",
-        "p-4"
-      )}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs uppercase tracking-wide text-gray-500 font-medium">
-          {title}
-        </p>
-        <Icon className="h-5 w-5 text-gray-700" />
-      </div>
+<Card
+  className={cn(
+    "rounded-3xl border border-gray-200 bg-white/90 backdrop-blur-xl",
+    "shadow-[0_4px_18px_-4px_rgba(0,0,0,0.08)] hover:shadow-xl transition-all duration-200",
+    "p-5"
+  )}
+>
+  <div className="flex items-center gap-3 mb-4">
+    <Icon className="h-4 w-4 text-black" />
 
-      <p className="text-3xl font-semibold text-gray-900 leading-snug">
-        {value}
-      </p>
-    </Card>
+    <span className="text-xs uppercase tracking-wide text-gray-500 font-medium">
+      {title}
+    </span>
+  </div>
+
+  <div className="leading-tight">
+    <span className="text-3xl font-semibold text-gray-900 leading-snug break-all">
+      {value}
+    </span>
+  </div>
+</Card>
+
   );
 }
 
@@ -164,10 +168,10 @@ export default function Overview({ campaignId }: { campaignId: number }) {
         <StatCard title="Total Sales" value={overview.sales} icon={ShoppingCart} />
         <StatCard
           title="Conversion Rate"
-          value={`${overview.conversionPercentage}%`}
+          value={`${overview.conversionPercentage.toFixed()}%`}
           icon={Percent}
         />
-        <StatCard title="Revenue" value={overview.revenue} icon={IndianRupee} />
+        <StatCard title="Revenue" value={`${overview.revenue}`} icon={IndianRupee} />
         <StatCard title="Active Creators" value={overview.creators} icon={Users} />
         <StatCard
           title="Products Attached"
@@ -264,14 +268,22 @@ export default function Overview({ campaignId }: { campaignId: number }) {
           <CardContent className="text-sm space-y-5 text-gray-700">
             <Detail
               label="Created"
-              value={new Date(campaign.createdAt).toLocaleDateString()}
+              value={new Date(campaign.createdAt).toLocaleDateString("en-US", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
             />
 
             <Detail
               label="Started"
               value={
                 campaign.startedAt
-                  ? new Date(campaign.startedAt).toLocaleDateString()
+                  ? new Date(campaign.startedAt).toLocaleDateString("en-US", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
                   : "Not started"
               }
             />
@@ -280,7 +292,13 @@ export default function Overview({ campaignId }: { campaignId: number }) {
               label="Completed"
               value={
                 campaign.completedAt
-                  ? new Date(campaign.completedAt).toLocaleDateString()
+                  ?
+                  new Date(campaign.completedAt).toLocaleDateString("en-US", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+
                   : "Not completed"
               }
             />
@@ -297,7 +315,7 @@ export default function Overview({ campaignId }: { campaignId: number }) {
                 ) : (
                   <>
                     <Play size={16} />
-                    Start Campaign
+                    Start
                   </>
                 )}
               </Button>
@@ -314,8 +332,8 @@ export default function Overview({ campaignId }: { campaignId: number }) {
                     "Completing..."
                   ) : (
                     <>
-                      <CheckCircle size={16} />
-                      Complete Campaign
+                      <Check size={16} />
+                      Complete
                     </>
                   )}
                 </Button>
