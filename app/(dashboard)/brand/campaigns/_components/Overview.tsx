@@ -11,7 +11,7 @@ import {
   Megaphone,
   Play,
   CheckCircle,
-  PenLine,
+  Pen,
 } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -19,10 +19,10 @@ import { trpc } from "@/app/_trpc/trpc";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-
+import { Skeleton } from "@/components/ui/skeleton";
 
 function StatCard({
   title,
@@ -85,15 +85,77 @@ export default function Overview({ campaignId }: { campaignId: number }) {
   });
 
 
-  if (isLoading) return <div>Loading...</div>;
+  const [editOpen, setEditOpen] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [editedUrl, setEditedUrl] = useState("");
+
+
+  useEffect(() => {
+    if (data) {
+      const campaign = data.data.campaign;
+      setEditedName(campaign.name);
+      setEditedUrl(campaign.redirectUrl);
+    }
+  }, [data]);
+  if (isLoading)
+    return (
+      <div className="space-y-8">
+
+        {/* STATS GRID SKELETON */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <Card
+              key={i}
+              className="rounded-3xl p-4 border border-gray-200 bg-white/70 backdrop-blur"
+            >
+              <Skeleton className="h-4 w-24 mb-4" />
+              <Skeleton className="h-7 w-16" />
+            </Card>
+          ))}
+        </div>
+
+        {/* MAIN SECTION SKELETON */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          {/* Left Card */}
+          <Card className="rounded-3xl border border-gray-200 p-6 bg-white/80 backdrop-blur">
+            <Skeleton className="h-5 w-40 mb-6" />
+            <div className="space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="space-y-2 pb-3 border-b">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Right Card */}
+          <Card className="rounded-3xl border border-gray-200 p-6 bg-white/80 backdrop-blur">
+            <Skeleton className="h-5 w-32 mb-6" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-2 pb-3 border-b">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+              ))}
+
+              <div className="flex gap-3 pt-4">
+                <Skeleton className="h-9 w-32 rounded-xl" />
+                <Skeleton className="h-9 w-40 rounded-xl" />
+              </div>
+            </div>
+          </Card>
+
+        </div>
+      </div>
+    );
+
   if (!data) return <div>No data found.</div>;
 
   const overview = data.data;
   const campaign = overview.campaign;
-
-  const [editOpen, setEditOpen] = useState(false);
-  const [editedName, setEditedName] = useState(campaign.name);
-  const [editedUrl, setEditedUrl] = useState(campaign.redirectUrl);
   return (
     <div className="space-y-8">
       {/* STATS GRID */}
@@ -124,7 +186,7 @@ export default function Overview({ campaignId }: { campaignId: number }) {
           )}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-5">
               <CardTitle className="text-lg font-semibold text-gray-900">
                 Campaign Details
               </CardTitle>
@@ -136,6 +198,7 @@ export default function Overview({ campaignId }: { campaignId: number }) {
                 }}
                 className="px-3 py-1"
               >
+                <Pen size={16} />
                 Edit
               </Button>
             </div>

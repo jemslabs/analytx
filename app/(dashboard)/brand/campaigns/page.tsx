@@ -54,20 +54,20 @@ function BrandCampaigns() {
                         {isLoading ? (
                             Array.from({ length: 3 }).map((_, i) => (
                                 <tr key={i}>
-                                    <td colSpan={5} className="px-6 py-4">
+                                    <td colSpan={6} className="px-6 py-4">
                                         <Skeleton className="h-4 w-full" />
                                     </td>
                                 </tr>
                             ))
                         ) : error ? (
                             <tr>
-                                <td colSpan={5} className="px-6 py-4 text-center text-red-600">
+                                <td colSpan={6} className="px-6 py-4 text-center text-red-600">
                                     {error.message}
                                 </td>
                             </tr>
                         ) : data?.data.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                                     No campaigns found.
                                 </td>
                             </tr>

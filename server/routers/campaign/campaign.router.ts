@@ -3,7 +3,7 @@ import {
   addProductInCampaignSchema,
   completeCampaignSchema,
   createCampaignSchema,
-  createReferralCodeSchema,
+  generateReferralCodeSchema,
   removeProductFromCampaignSchema,
   sendCampaignInviteSchema,
   startCampaignSchema,
@@ -396,6 +396,7 @@ export const campaignRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
+
   removeProductFromCampaign: brandProcedure
     .input(removeProductFromCampaignSchema)
     .mutation(async ({ ctx, input }) => {
@@ -638,6 +639,61 @@ export const campaignRouter = router({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
   }),
+  getCampaignCreators: brandProcedure
+    .input(z.object({ campaignId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+
+      try {
+        const brand = await prisma.brandProfile.findUnique({
+          where: {
+            userId,
+          },
+        });
+
+        if (!brand) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found",
+          });
+        }
+        const campaign = await prisma.campaign.findUnique({
+          where: {
+            id: input.campaignId,
+          },
+        });
+
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign does not exist.",
+          });
+        }
+
+        if (campaign.brandId !== brand.id) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You do not have permission to access this campaign.",
+          });
+        }
+
+        const creators = await prisma.campaignMember.findMany({
+          where: {
+            campaignId: campaign.id,
+          },
+          include: {
+            creator: true,
+            _count: true,
+          },
+        });
+
+        return { success: true, creators };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
   acceptCampaignInvite: creatorProcedure
     .input(acceptCampaignInviteSchema)
     .mutation(async ({ ctx, input }) => {
@@ -752,8 +808,41 @@ export const campaignRouter = router({
       }
     }),
 
-  createReferralCode: creatorProcedure
-    .input(createReferralCodeSchema)
+    getMyCampaigns: creatorProcedure.query(async ({ctx}) =>{
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+      try {
+        const creatorProfile = await prisma.creatorProfile.findUnique({
+          where: {
+            userId
+          }
+        });
+
+        if (!creatorProfile) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Your creator profile not found.",
+          });
+        }
+
+        const campaigns = await prisma.campaignMember.findMany({
+          where: {
+            creatorId: creatorProfile.id
+          },
+          include: {
+            campaign: true
+          }
+        }) 
+
+
+        return {success: true, campaigns}
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+  generateReferralCode: creatorProcedure
+    .input(generateReferralCodeSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
       const userId = ctx.userId;
@@ -774,7 +863,7 @@ export const campaignRouter = router({
         if (!creator) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "You must be a creator to accept invites.",
+            message: "You must be a creator to generate referral codes.",
           });
         }
         const { campaignMemberId, platform } = input;
@@ -837,8 +926,67 @@ export const campaignRouter = router({
 
         return {
           success: true,
-          message: "Referral code created",
+          message: "Referral Code Generated",
           code,
+        };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+    getMyReferralCodes: creatorProcedure.input(z.object({
+      campaignMemberId: z.number()
+    })).query(async ({ctx, input})=>{
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
+
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { creatorProfile: true },
+        });
+
+        if (!user) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found.",
+          });
+        }
+        const creator = user.creatorProfile;
+        if (!creator) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be a creator to get referral codes.",
+          });
+        }
+        const { campaignMemberId } = input;
+        const member = await prisma.campaignMember.findFirst({
+          where: {
+            id: campaignMemberId,
+            creatorId: creator.id,
+          },
+        });
+        if (!member) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign member not found",
+          });
+        }
+
+
+        const referralCodes = await prisma.referralCode.findMany({
+          where: {
+            memberId: member.id
+          
+          },
+          orderBy: { createdAt: "desc" },
+        })
+
+
+        return {
+          success: true,
+          referralCodes
         };
       } catch (err) {
         if (err instanceof TRPCError) throw err;

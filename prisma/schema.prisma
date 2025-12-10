@@ -207,8 +207,11 @@ enum PlatformType {
   X
   LINKEDIN
   FACEBOOK
-  OTHER
+  WHATSAPP
+  TELEGRAM
+  WEBSITE
 }
+
 
 enum Currency {
   INR

@@ -6,10 +6,32 @@ import { useParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
-import Products from "../_components/Products";
-import Invites from "../_components/Invites";
 
 const Overview = dynamic(() => import("../_components/Overview"), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="animate-spin w-5 h-5" />
+        </div>
+    ),
+});
+const Products = dynamic(() => import("../_components/Products"), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="animate-spin w-5 h-5" />
+        </div>
+    ),
+});
+const Invites = dynamic(() => import("../_components/Invites"), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="animate-spin w-5 h-5" />
+        </div>
+    ),
+});
+const Creators = dynamic(() => import("../_components/Creators"), {
     ssr: false,
     loading: () => (
         <div className="flex items-center justify-center h-64">
@@ -54,6 +76,9 @@ function BrandCampaign() {
                     </TabsContent>
                     <TabsContent value="invites">
                         <Invites campaignId={campaignId}/>
+                    </TabsContent>
+                    <TabsContent value="creators">
+                        <Creators campaignId={campaignId}/>
                     </TabsContent>
                 </Tabs>
             </div>
