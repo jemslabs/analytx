@@ -16,59 +16,27 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { login } = useAuthStore();
   const router = useRouter();
 
-  const { login } = useAuthStore()
-  // Simple email regex validation
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const email = e.target.value;
-    setData({ ...data, email });
-    if (!validateEmail(email)) {
-      setEmailError("Please enter a valid email address");
-    } else {
-      setEmailError("");
-    }
-  };
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const password = e.target.value;
-    setData({ ...data, password });
-
-    if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
-    } else {
-      setPasswordError("");
-    }
-  };
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleLogin = async () => {
     if (emailError || passwordError) return;
+
     try {
       setIsLoading(true);
-      const afterLoginData = await login(data);
+      await login(data, router);
 
 
-      if (!afterLoginData) {
-        toast.error("Something went wrong. Please try again.")
-        return;
-      }
-
-      if (afterLoginData.role === "BRAND" && afterLoginData.brandProfile === null) {
-        router.push("/onboarding/brand")
-      } else if (afterLoginData.role === "CREATOR" && afterLoginData.creatorProfile === null) {
-        router.push("/onboarding/creator")
-      } else {
-        router.push(`/${afterLoginData.role === "CREATOR" ? "creator" : "brand"}`)
-      }
     } catch {
-      toast.error("Something went wrong. Please try again.")
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +45,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       <div className="flex w-full text-center">
-
         {/* LEFT SIDE */}
         <div className="flex flex-col justify-center space-y-8 w-full md:w-1/2 px-4 md:px-20 bg-primary/10">
           <div className="space-y-3 mb-10">
@@ -106,10 +73,16 @@ export default function LoginPage() {
               <Input
                 placeholder="name@example.com"
                 value={data.email}
-                onChange={handleEmailChange}
+                onChange={(e) => {
+                  const email = e.target.value;
+                  setData({ ...data, email });
+                  setEmailError(validateEmail(email) ? "" : "Please enter a valid email address");
+                }}
                 className="h-12"
               />
-              {emailError && <p className="text-red-500 text-sm text-left">{emailError}</p>}
+              {emailError && (
+                <p className="text-red-500 text-sm text-left">{emailError}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -121,7 +94,15 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   className="h-12 pr-10"
                   value={data.password}
-                  onChange={handlePasswordChange}
+                  onChange={(e) => {
+                    const password = e.target.value;
+                    setData({ ...data, password });
+                    setPasswordError(
+                      password.length < 6
+                        ? "Password must be at least 6 characters"
+                        : ""
+                    );
+                  }}
                 />
 
                 <button
@@ -137,7 +118,9 @@ export default function LoginPage() {
                 </button>
               </div>
               {passwordError && (
-                <p className="text-red-500 text-sm text-left">{passwordError}</p>
+                <p className="text-red-500 text-sm text-left">
+                  {passwordError}
+                </p>
               )}
             </div>
 
@@ -160,8 +143,11 @@ export default function LoginPage() {
             </Button>
 
             <p className="text-md">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-medium underline text-blue-500">
+              Don't have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-medium underline text-blue-500"
+              >
                 Signup
               </Link>
             </p>
@@ -174,7 +160,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-
-
   );
 }

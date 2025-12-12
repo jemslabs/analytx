@@ -5,7 +5,7 @@ import './globals.css'
 import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalUserLoader } from "@/components/GlobalUserLoader";
-import ClientOnlyFetchUser from "@/components/ClientOnlyFetchUser";
+import FetchUser from "@/components/FetchUser";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +36,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <ClientOnlyFetchUser />
+          <FetchUser />
           <GlobalUserLoader />
           {children}
         </QueryProvider>

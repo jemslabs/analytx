@@ -28,67 +28,31 @@ export default function FetchUser() {
   useEffect(() => {
     if (isLoading) return;
 
-    if (!user && serverUser) setUser(serverUser);
+    // set global store
+    if (!user && serverUser) {
+      setUser(serverUser);
+    }
+
     setIsUserLoading(false);
 
-    // Not logged in → redirect to login
-    // Not logged in → allow login & signup pages
+    // If NOT logged in
     if (!user && !serverUser) {
-      if (
-        !pathname.startsWith("/login") &&
-        !pathname.startsWith("/signup")
-      ) {
+      const isPublicPage =
+        pathname.startsWith("/login") ||
+        pathname.startsWith("/signup") ||
+        pathname === "/" ||
+        pathname.startsWith("/pricing") ||
+        pathname.startsWith("/docs") ||
+        pathname.startsWith("/r/"); // ← added this
+
+      if (!isPublicPage) {
         router.replace("/login");
       }
+
       return;
     }
 
-
-    const currentUser = user || serverUser;
-
-    // Allow public pages
-    if (
-      pathname.startsWith("/login") ||
-      pathname.startsWith("/signup") ||
-      pathname === "/" ||
-      pathname.startsWith("/pricing") ||
-      pathname.startsWith("/docs")
-    ) {
-      return;
-    }
-
-    // BRAND
-    if (currentUser.role === "BRAND") {
-      if (!currentUser.brandProfile) {
-        if (!pathname.startsWith("/onboarding/brand")) {
-          router.replace("/onboarding/brand");
-        }
-        return;
-      }
-
-      const base = `/brand`;
-      if (!pathname.startsWith(base)) {
-        router.replace(base);
-      }
-      return;
-    }
-
-    // CREATOR
-    if (currentUser.role === "CREATOR") {
-      if (!currentUser.creatorProfile) {
-        if (!pathname.startsWith("/onboarding/creator")) {
-          router.replace("/onboarding/creator");
-        }
-        return;
-      }
-
-      const base = `/creator`;
-      if (!pathname.startsWith(base)) {
-        router.replace(base);
-      }
-      return;
-    }
-
+    // logged in → do nothing here
   }, [user, serverUser, isLoading, pathname, router]);
 
   return null;

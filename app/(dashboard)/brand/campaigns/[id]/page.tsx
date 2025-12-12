@@ -39,6 +39,14 @@ const Creators = dynamic(() => import("../_components/Creators"), {
         </div>
     ),
 });
+const Settings = dynamic(() => import("../_components/Settings"), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="animate-spin w-5 h-5" />
+        </div>
+    ),
+});
 
 function BrandCampaign() {
     const { id } = useParams();
@@ -65,7 +73,7 @@ function BrandCampaign() {
                         <TabsTrigger value="products">Products</TabsTrigger>
                         <TabsTrigger value="creators">Creators</TabsTrigger>
                         <TabsTrigger value="invites">Invites</TabsTrigger>
-                        <TabsTrigger value="performance">Performance</TabsTrigger>
+                        <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview">
@@ -79,6 +87,9 @@ function BrandCampaign() {
                     </TabsContent>
                     <TabsContent value="creators">
                         <Creators campaignId={campaignId}/>
+                    </TabsContent>
+                    <TabsContent value="settings">
+                        <Settings campaignId={campaignId}/>
                     </TabsContent>
                 </Tabs>
             </div>

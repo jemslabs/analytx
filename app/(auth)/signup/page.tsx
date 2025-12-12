@@ -65,16 +65,8 @@ export default function SignupPage() {
 
       setIsLoading(true);
 
-      const afterSignupData = await signup(data);
-      if (!afterSignupData) {
-        toast.error("Something went wrong. Please try again.")
-        return;
-      }
-      if (afterSignupData.role === "BRAND") {
-        router.push("/onboarding/brand")
-      } else {
-        router.push("/onboarding/creator")
-      }
+      await signup(data, router);
+
     } catch {
       toast.error("Something went wrong. Please try again.")
     } finally {

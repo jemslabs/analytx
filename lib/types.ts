@@ -43,8 +43,8 @@ export type creatorProfileType = {
 export type useAuthStoreType = {
   user: userType | null;
   isUserLoading: boolean;
-  signup: (data: signupType) => Promise<userType | null>;
-  login: (data: loginType) => Promise<userType | null>;
+  signup: (data: signupType, router: AppRouterInstance) =>void;
+  login: (data: loginType, router: AppRouterInstance) => void;
   logout: (router: AppRouterInstance) => void;
   setUser: (user: userType) => void;
   setIsUserLoading: (value: boolean) => void;
@@ -74,3 +74,42 @@ export type CreatorNicheType =
   | "TRAVEL"
   | "EDUCATION"
   | "OTHER";
+
+
+export type SalesOverTimeItem = {
+  purchasedAt: string;
+  _count?: { id?: number };
+};
+
+export type ClicksOverTimeItem = {
+  date: string;
+  _sum?: { count?: number };
+};
+
+export type CreatorStat = {
+  creatorId: number;
+  name: string;
+  sales: number;
+  clicks: number;
+  revenue: number;
+};
+
+export type ProductStat = {
+  productId: number;
+  name: string;
+  sales: number;
+  revenue: number;
+};
+
+export type OverviewShape = {
+  sales: number;
+  clicks: number;
+  revenue: number;
+  conversionPercentage: number;
+  creators: number;
+  products: number;
+  salesOverTime: SalesOverTimeItem[];
+  clicksOverTime: ClicksOverTimeItem[];
+  topCreators: CreatorStat[];
+  topProducts: ProductStat[];
+};

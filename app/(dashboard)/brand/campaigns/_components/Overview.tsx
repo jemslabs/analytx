@@ -1,5 +1,12 @@
 "use client";
 
+import React, { useMemo, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { trpc } from "@/app/_trpc/trpc";
+import {SalesOverTimeItem, ClicksOverTimeItem, OverviewShape} from '@/lib/types'
+
 import {
   BarChart3,
   ShoppingCart,
@@ -7,105 +14,103 @@ import {
   IndianRupee,
   Users,
   Package,
-  CalendarDays,
-  Megaphone,
-  Play,
-  Pen,
-  Check,
 } from "lucide-react";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { trpc } from "@/app/_trpc/trpc";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import StatCard from "@/components/StatCard";
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-}: {
-  title: string;
-  value: string | number;
-  icon: any;
-}) {
-  return (
-<Card
-  className={cn(
-    "rounded-3xl border border-gray-200 bg-white/90 backdrop-blur-xl",
-    "shadow-[0_4px_18px_-4px_rgba(0,0,0,0.08)] hover:shadow-xl transition-all duration-200",
-    "p-5"
-  )}
->
-  <div className="flex items-center gap-3 mb-4">
-    <Icon className="h-4 w-4 text-black" />
 
-    <span className="text-xs uppercase tracking-wide text-gray-500 font-medium">
-      {title}
-    </span>
-  </div>
 
-  <div className="leading-tight">
-    <span className="text-3xl font-semibold text-gray-900 leading-snug break-all">
-      {value}
-    </span>
-  </div>
-</Card>
 
-  );
+
+function formatDateIsoToDay(iso: string) {
+  const d = new Date(iso);
+  return d.toISOString().slice(0, 10);
 }
 
-export default function Overview({ campaignId }: { campaignId: number }) {
-  const { data, isLoading, refetch } = trpc.campaign.getCampaignOverview.useQuery(
+function groupSalesByDay(salesOverTime: SalesOverTimeItem[]) {
+  const map = new Map<string, number>();
+  salesOverTime.forEach((s) => {
+    const day = formatDateIsoToDay(s.purchasedAt);
+    const count = s._count?.id ?? 0;
+    map.set(day, (map.get(day) ?? 0) + count);
+  });
+  const arr = Array.from(map.entries()).map(([date, sales]) => ({ date, sales }));
+  arr.sort((a, b) => a.date.localeCompare(b.date));
+  return arr;
+}
+
+function normalizeClicksOverTime(clicksOverTime: ClicksOverTimeItem[]) {
+  const arr = clicksOverTime.map((c) => ({
+    date: formatDateIsoToDay(c.date),
+    clicks: c._sum?.count ?? 0,
+  }));
+  arr.sort((a, b) => a.date.localeCompare(b.date));
+  return arr;
+}
+
+export default function CampaignOverviewAnalytics({
+  campaignId,
+}: {
+  campaignId: number;
+}) {
+  const query = trpc.campaign.getCampaignOverview.useQuery(
     { campaignId },
     { staleTime: 1000 * 30 }
   );
 
-  const startCampaign = trpc.campaign.startCampaign.useMutation({
-    onSuccess: (res) => {
-      toast.success(res.message);
-      refetch();
-    },
-    onError: (err) => toast.error(err.message),
-  });
+  const [creatorsMetric, setCreatorsMetric] = useState<
+    "revenue" | "clicks" | "sales"
+  >("revenue");
+  const [productsMetric, setProductsMetric] = useState<"sales" | "revenue">(
+    "sales"
+  );
 
-  const completeCampaign = trpc.campaign.completeCampaign.useMutation({
-    onSuccess: (res) => {
-      toast.success(res.message);
-      refetch();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-  const updateCampaign = trpc.campaign.updateCampaign.useMutation({
-    onSuccess: (res) => {
-      toast.success(res.message);
-      refetch();
-    },
-    onError: (err) => toast.error(err.message),
-  });
+  const isLoading = query.isLoading;
+  const overview = query.data?.data as OverviewShape | undefined;
 
+  const salesByDay = useMemo(() => {
+    if (!overview) return [] as { date: string; sales: number }[];
+    return groupSalesByDay(overview.salesOverTime || []);
+  }, [overview]);
 
-  const [editOpen, setEditOpen] = useState(false);
-  const [editedName, setEditedName] = useState("");
-  const [editedUrl, setEditedUrl] = useState("");
+  const clicksByDay = useMemo(() => {
+    if (!overview) return [] as { date: string; clicks: number }[];
+    return normalizeClicksOverTime(overview.clicksOverTime || []);
+  }, [overview]);
 
+  const unifiedDates = useMemo(() => {
+    if (!overview) return [] as string[];
+    const set = new Set<string>();
+    salesByDay.forEach((s) => set.add(s.date));
+    clicksByDay.forEach((c) => set.add(c.date));
+    return Array.from(set).sort();
+  }, [salesByDay, clicksByDay]);
 
-  useEffect(() => {
-    if (data) {
-      const campaign = data.data.campaign;
-      setEditedName(campaign.name);
-      setEditedUrl(campaign.redirectUrl);
-    }
-  }, [data]);
-  if (isLoading)
+  const combinedSeries = useMemo(
+    () =>
+      unifiedDates.map((date) => ({
+        date,
+        sales: salesByDay.find((s) => s.date === date)?.sales ?? 0,
+        clicks: clicksByDay.find((c) => c.date === date)?.clicks ?? 0,
+      })),
+    [unifiedDates, salesByDay, clicksByDay]
+  );
+
+  if (isLoading) {
     return (
       <div className="space-y-8">
-
-        {/* STATS GRID SKELETON */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(6)].map((_, i) => (
             <Card
@@ -118,293 +123,215 @@ export default function Overview({ campaignId }: { campaignId: number }) {
           ))}
         </div>
 
-        {/* MAIN SECTION SKELETON */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Left Card */}
-          <Card className="rounded-3xl border border-gray-200 p-6 bg-white/80 backdrop-blur">
-            <Skeleton className="h-5 w-40 mb-6" />
-            <div className="space-y-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="space-y-2 pb-3 border-b">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-full" />
-                </div>
-              ))}
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <Card className="p-4 rounded-3xl">
+            <Skeleton className="h-48 w-full" />
           </Card>
-
-          {/* Right Card */}
-          <Card className="rounded-3xl border border-gray-200 p-6 bg-white/80 backdrop-blur">
-            <Skeleton className="h-5 w-32 mb-6" />
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="space-y-2 pb-3 border-b">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-28" />
-                </div>
-              ))}
-
-              <div className="flex gap-3 pt-4">
-                <Skeleton className="h-9 w-32 rounded-xl" />
-                <Skeleton className="h-9 w-40 rounded-xl" />
-              </div>
-            </div>
+          <Card className="p-4 rounded-3xl">
+            <Skeleton className="h-48 w-full" />
           </Card>
-
         </div>
       </div>
     );
+  }
 
-  if (!data) return <div>No data found.</div>;
+  if (!overview) return <div>No data found.</div>;
 
-  const overview = data.data;
-  const campaign = overview.campaign;
+  const creators = overview.topCreators || [];
+  const products = overview.topProducts || [];
+
   return (
     <div className="space-y-8">
-      {/* STATS GRID */}
+      {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <StatCard title="Total Clicks" value={overview.clicks} icon={BarChart3} />
         <StatCard title="Total Sales" value={overview.sales} icon={ShoppingCart} />
         <StatCard
           title="Conversion Rate"
-          value={`${overview.conversionPercentage.toFixed()}%`}
+          value={`${overview.conversionPercentage.toFixed(1)}%`}
           icon={Percent}
         />
-        <StatCard title="Revenue" value={`${overview.revenue}`} icon={IndianRupee} />
-        <StatCard title="Active Creators" value={overview.creators} icon={Users} />
         <StatCard
-          title="Products Attached"
-          value={overview.products}
-          icon={Package}
+          title="Revenue"
+          value={`₹${overview.revenue.toLocaleString()}`}
+          icon={IndianRupee}
         />
+        <StatCard title="Active Creators" value={overview.creators} icon={Users} />
+        <StatCard title="Products Attached" value={overview.products} icon={Package} />
       </div>
 
-      {/* MAIN SECTION */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Campaign Details */}
-        <Card
-          className={cn(
-            "rounded-3xl border border-gray-200 bg-white/90 backdrop-blur-xl",
-            "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)]"
-          )}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-5">
-              <CardTitle className="text-lg font-semibold text-gray-900">
-                Campaign Details
-              </CardTitle>
-              <Button
-                onClick={() => {
-                  setEditedName(campaign.name);
-                  setEditedUrl(campaign.redirectUrl);
-                  setEditOpen(true);
-                }}
-                className="px-3 py-1"
-              >
-                <Pen size={16} />
-                Edit
-              </Button>
-            </div>
-
-            <Megaphone className="h-5 w-5 text-gray-800" />
-          </CardHeader>
-
-
-
-          <CardContent className="text-sm space-y-5 text-gray-700">
-            <Detail label="Name" value={campaign.name} />
-
-            <Detail
-              label="Redirect URL"
-              value={
-                <a
-                  href={campaign.redirectUrl}
-                  target="_blank"
-                  className="underline text-blue-600"
-                >
-                  {campaign.redirectUrl}
-                </a>
-              }
-            />
-
-            <Detail label="Payout Model" value={campaign.payoutModel} />
-
-            <Detail
-              label="Commission Structure"
-              value={(() => {
-                const cps =
-                  (campaign.payoutModel === "CPS" ||
-                    campaign.payoutModel === "BOTH") &&
-                  (campaign.cpsCommissionType === "PERCENTAGE"
-                    ? `${campaign.cpsValue}% CPS`
-                    : `₹${campaign.cpsValue} CPS`);
-
-                const cpc =
-                  (campaign.payoutModel === "CPC" ||
-                    campaign.payoutModel === "BOTH") &&
-                  `₹${campaign.cpcValue} CPC`;
-
-                return cps && cpc ? `${cps} • ${cpc}` : cps || cpc || "--";
-              })()}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Timeline */}
-        <Card
-          className={cn(
-            "rounded-3xl border border-gray-200 bg-white/90 backdrop-blur-xl",
-            "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)]"
-          )}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Timeline
-            </CardTitle>
-            <CalendarDays className="h-5 w-5 text-gray-800" />
-          </CardHeader>
-
-          <CardContent className="text-sm space-y-5 text-gray-700">
-            <Detail
-              label="Created"
-              value={new Date(campaign.createdAt).toLocaleDateString("en-US", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })}
-            />
-
-            <Detail
-              label="Started"
-              value={
-                campaign.startedAt
-                  ? new Date(campaign.startedAt).toLocaleDateString("en-US", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })
-                  : "Not started"
-              }
-            />
-
-            <Detail
-              label="Completed"
-              value={
-                campaign.completedAt
-                  ?
-                  new Date(campaign.completedAt).toLocaleDateString("en-US", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })
-
-                  : "Not completed"
-              }
-            />
-
-            {/* ACTION BUTTONS */}
-            <div className="pt-4 flex gap-3">
-              <Button
-                onClick={() => startCampaign.mutate({ campaignId })}
-                disabled={Boolean(campaign.startedAt)}
-                className={cn("px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2")}
-              >
-                {startCampaign.isPending ? (
-                  "Starting..."
-                ) : (
-                  <>
-                    <Play size={16} />
-                    Start
-                  </>
-                )}
-              </Button>
-
-              {campaign.startedAt && (
-                <Button
-                  onClick={() => completeCampaign.mutate({ campaignId })}
-                  disabled={Boolean(campaign.completedAt)}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2"
-                  )}
-                >
-                  {completeCampaign.isPending ? (
-                    "Completing..."
-                  ) : (
-                    <>
-                      <Check size={16} />
-                      Complete
-                    </>
-                  )}
-                </Button>
-              )}
-
-            </div>
-          </CardContent>
-        </Card>
-
-      </div>
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Campaign</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 mt-2">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Campaign Name</p>
-              <Input
-                value={editedName}
-                onChange={(e) => setEditedName(e.target.value)}
-                placeholder="Campaign Name"
-              />
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-gray-700">Redirect URL</p>
-              <Input
-                value={editedUrl}
-                onChange={(e) => setEditedUrl(e.target.value)}
-                placeholder="https://example.com"
-              />
+      {/* SALES + CLICKS CHART */}
+      <div className="gap-5">
+        <Card className="p-4 rounded-3xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Sales & Clicks Over Time</h3>
+            <div className="text-sm text-gray-500">
+              Showing {combinedSeries.length} points
             </div>
           </div>
 
-          <DialogFooter className="mt-4 flex gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => setEditOpen(false)}
-            >
-              Cancel
-            </Button>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={combinedSeries}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="sales"
+                  name="Sales"
+                  stroke="#4f46e5"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="clicks"
+                  name="Clicks"
+                  stroke="#16a34a"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
 
-            <Button
-              onClick={() => {
-                updateCampaign.mutate({
-                  campaignId,
-                  name: editedName,
-                  redirectUrl: editedUrl,
-                });
+      {/* TOP CREATORS + TOP PRODUCTS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* TOP CREATORS */}
+        <Card className="p-4 rounded-3xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Top Creators</h3>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant={creatorsMetric === "revenue" ? "default" : "ghost"}
+                onClick={() => setCreatorsMetric("revenue")}
+              >
+                Revenue
+              </Button>
+              <Button
+                size="sm"
+                variant={creatorsMetric === "clicks" ? "default" : "ghost"}
+                onClick={() => setCreatorsMetric("clicks")}
+              >
+                Clicks
+              </Button>
+              <Button
+                size="sm"
+                variant={creatorsMetric === "sales" ? "default" : "ghost"}
+                onClick={() => setCreatorsMetric("sales")}
+              >
+                Sales
+              </Button>
+            </div>
+          </div>
 
-                setEditOpen(false);
-              }}
-              disabled={updateCampaign.isPending}
-            >
-              {updateCampaign.isPending ? "Updating..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={creators
+                  .map((c) => ({
+                    name: c.name,
+                    revenue: c.revenue,
+                    clicks: c.clicks,
+                    sales: c.sales,
+                  }))
+                  .sort((a, b) => b[creatorsMetric] - a[creatorsMetric])}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey={creatorsMetric} fill="#4f46e5" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
 
-    </div>
-  );
-}
+          <div className="space-y-2 mt-4">
+            {creators.map((c) => (
+              <div key={c.creatorId} className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{c.name}</div>
+                  <div className="text-sm text-gray-600">
+                    {c.sales} sales • {c.clicks} clicks
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold">₹{Number(c.revenue).toLocaleString()}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
 
-function Detail({ label, value }: { label: string; value: any }) {
-  return (
-    <div className="space-y-1 pb-3 border-b last:border-none">
-      <p className="font-semibold text-gray-800">{label}</p>
-      <p className="text-gray-600">{value}</p>
+        {/* TOP PRODUCTS */}
+        <Card className="p-4 rounded-3xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Top Products</h3>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant={productsMetric === "sales" ? "default" : "ghost"}
+                onClick={() => setProductsMetric("sales")}
+              >
+                Sales
+              </Button>
+              <Button
+                size="sm"
+                variant={productsMetric === "revenue" ? "default" : "ghost"}
+                onClick={() => setProductsMetric("revenue")}
+              >
+                Revenue
+              </Button>
+            </div>
+          </div>
+
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={products
+                  .map((p) => ({
+                    name: p.name,
+                    sales: p.sales,
+                    revenue: p.revenue,
+                  }))
+                  .sort((a, b) => b[productsMetric] - a[productsMetric])}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey={productsMetric} fill="#4f46e5" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="space-y-2 mt-4">
+            {products.map((p) => (
+              <div key={p.productId} className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{p.name}</div>
+                  <div className="text-sm text-gray-600">Sales: {p.sales}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold">
+                    {productsMetric === "revenue"
+                      ? `₹${Number(p.revenue).toLocaleString()}`
+                      : `Sales: ${p.sales}`}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

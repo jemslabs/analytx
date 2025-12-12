@@ -5,7 +5,16 @@ import { trpc } from "../app/_trpc/trpc";
 import { httpBatchLink } from "@trpc/client";
 
 export default function QueryProvider({ children }: { children: React.ReactNode }) {
-    const [queryClient] = useState(() => new QueryClient());
+    const [queryClient] = useState(() => new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnMount: "always",
+            refetchOnReconnect: false,
+            refetchOnWindowFocus: false,
+            staleTime: 0, // always fetch fresh
+          },
+        },
+      }));
     const trpcClient = useMemo(
         () => trpc.createClient({
             links: [

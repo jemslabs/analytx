@@ -1,4 +1,5 @@
 import CreatorSidebar from "@/components/CreatorSidebar";
+import BlockCreatorDashboard from "@/components/BlockCreatorDashboard";
 
 
 export default function CreatorDashboardLayout({
@@ -8,6 +9,7 @@ export default function CreatorDashboardLayout({
 }) {
   return (
     <div className="flex bg-primary/10 gap-3 min-h-screen">
+      <BlockCreatorDashboard />
       {/* Fixed sidebar */}
       <CreatorSidebar />
 

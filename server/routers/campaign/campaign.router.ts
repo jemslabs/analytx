@@ -155,7 +155,161 @@ export const campaignRouter = router({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
   }),
-  getCampaignOverview: brandProcedure
+getCampaignOverview: brandProcedure
+  .input(z.object({ campaignId: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const prisma = ctx.prisma;
+    const userId = ctx.userId;
+
+    try {
+      const brand = await prisma.brandProfile.findUnique({
+        where: { userId },
+      });
+
+      if (!brand) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Brand profile not found",
+        });
+      }
+
+      const campaign = await prisma.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          brandId: brand.id,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      const campaignId = input.campaignId;
+
+      // ------------------------------------------------
+      // 1. TOTAL SALES / CLICKS / REVENUE / CREATORS / PRODUCTS
+      // ------------------------------------------------
+      const [salesCount, clicksAgg, revenueAgg, creators, products] =
+        await Promise.all([
+          prisma.saleEvent.count({
+            where: { member: { campaignId } },
+          }),
+
+          prisma.clickEvent.aggregate({
+            _sum: { count: true },
+            where: { member: { campaignId } },
+          }),
+
+          prisma.saleEvent.aggregate({
+            _sum: { salePrice: true },
+            where: { member: { campaignId } },
+          }),
+
+          prisma.campaignMember.count({ where: { campaignId } }),
+
+          prisma.campaignProduct.count({ where: { campaignId } }),
+        ]);
+
+      const totalClicks = clicksAgg._sum.count ?? 0;
+      const totalRevenue = revenueAgg._sum.salePrice ?? 0;
+      const conversionPercentage =
+        totalClicks > 0 ? (salesCount / totalClicks) * 100 : 0;
+
+      // ------------------------------------------------
+      // 2. SALES OVER TIME
+      // ------------------------------------------------
+      const salesOverTime = await prisma.saleEvent.groupBy({
+        by: ["purchasedAt"],
+        _count: { id: true },
+        where: { member: { campaignId } },
+        orderBy: { purchasedAt: "asc" },
+      });
+
+      // ------------------------------------------------
+      // 3. CLICKS OVER TIME
+      // ------------------------------------------------
+      const clicksOverTime = await prisma.clickEvent.groupBy({
+        by: ["date"],
+        _sum: { count: true },
+        where: { member: { campaignId } },
+        orderBy: { date: "asc" },
+      });
+
+      // ------------------------------------------------
+      // 4. TOP CREATORS
+      // ------------------------------------------------
+      const topCreatorsRaw = await prisma.campaignMember.findMany({
+        where: { campaignId },
+        include: {
+          creator: true,
+          sales: true,
+          clicks: true,
+        },
+      });
+
+      const topCreators = topCreatorsRaw
+        .map((m) => ({
+          creatorId: m.creatorId,
+          name: m.creator.name,
+          sales: m.sales.length,
+          clicks: m.clicks.reduce((sum, c) => sum + c.count, 0),
+          revenue: m.sales.reduce((sum, s) => sum + s.salePrice, 0),
+        }))
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 10);
+
+      // ------------------------------------------------
+      // 5. TOP PRODUCTS (SALES + REVENUE ONLY)
+      // ------------------------------------------------
+      const productList = await prisma.campaignProduct.findMany({
+        where: { campaignId },
+        include: {
+          product: true,
+          sales: true,
+        },
+      });
+
+      const productStats = productList.map((p) => ({
+        productId: p.productId,
+        name: p.product.name,
+        sales: p.sales.length,
+        revenue: p.sales.reduce((sum, s) => sum + s.salePrice, 0),
+      }));
+
+      const topProducts = productStats
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 10);
+
+      // ------------------------------------------------
+      // RETURN
+      // ------------------------------------------------
+      return {
+        success: true,
+        data: {
+          sales: salesCount,
+          clicks: totalClicks,
+          revenue: totalRevenue,
+          conversionPercentage,
+          creators,
+          products,
+
+          salesOverTime,
+          clicksOverTime,
+          topCreators,
+          topProducts,
+        },
+      };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
+
+
+  getCampaignDetails: brandProcedure
     .input(z.object({ campaignId: z.number() }))
     .query(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -188,50 +342,7 @@ export const campaignRouter = router({
           });
         }
 
-        // Fetch all aggregated stats
-        const [sales, clicksAgg, revenue, creators, products] =
-          await Promise.all([
-            prisma.saleEvent.count({
-              where: {
-                member: { campaignId: input.campaignId },
-              },
-            }),
-
-            prisma.clickEvent.aggregate({
-              _sum: { count: true },
-              where: { member: { campaignId: input.campaignId } },
-            }),
-
-            prisma.saleEvent.aggregate({
-              _sum: { salePrice: true },
-              where: {
-                member: { campaignId: input.campaignId },
-              },
-            }),
-            prisma.campaignMember.count({
-              where: { campaignId: input.campaignId },
-            }),
-            prisma.campaignProduct.count({
-              where: { campaignId: input.campaignId },
-            }),
-          ]);
-
-        const totalRevenue = revenue._sum.salePrice ?? 0;
-        const clicks = clicksAgg._sum.count ?? 0;
-        const conversionPercentage = clicks > 0 ? (sales / clicks) * 100 : 0;
-
-        return {
-          success: true,
-          data: {
-            sales,
-            clicks,
-            conversionPercentage,
-            revenue: totalRevenue,
-            creators,
-            products,
-            campaign: campaign,
-          },
-        };
+        return { success: true, campaign };
       } catch (err) {
         if (err instanceof TRPCError) throw err;
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });

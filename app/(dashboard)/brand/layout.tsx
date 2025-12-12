@@ -1,4 +1,5 @@
 import BrandSidebar from "@/components/BrandSidebar";
+import BlockBrandDashboard from "@/components/BlockBrandDashboard";
 
 
 export default function BrandDashboardLayout({
@@ -8,6 +9,7 @@ export default function BrandDashboardLayout({
 }) {
   return (
     <div className="flex bg-primary/10 gap-3 min-h-screen">
+      <BlockBrandDashboard />
       {/* Fixed sidebar */}
       <BrandSidebar />
 
