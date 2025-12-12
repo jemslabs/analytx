@@ -43,7 +43,7 @@ export type creatorProfileType = {
 export type useAuthStoreType = {
   user: userType | null;
   isUserLoading: boolean;
-  signup: (data: signupType, router: AppRouterInstance) =>void;
+  signup: (data: signupType, router: AppRouterInstance) => void;
   login: (data: loginType, router: AppRouterInstance) => void;
   logout: (router: AppRouterInstance) => void;
   setUser: (user: userType) => void;
@@ -75,7 +75,6 @@ export type CreatorNicheType =
   | "EDUCATION"
   | "OTHER";
 
-
 export type SalesOverTimeItem = {
   purchasedAt: string;
   _count?: { id?: number };
@@ -100,7 +99,20 @@ export type ProductStat = {
   sales: number;
   revenue: number;
 };
+export type PlatformClicksStat = {
+  platform: string;
+  clicks: number;
+};
 
+export type PlatformSalesStat = {
+  platform: string;
+  sales: number;
+};
+
+export type TopPlatforms = {
+  clicks: PlatformClicksStat[];
+  sales: PlatformSalesStat[];
+};
 export type OverviewShape = {
   sales: number;
   clicks: number;
@@ -112,4 +124,5 @@ export type OverviewShape = {
   clicksOverTime: ClicksOverTimeItem[];
   topCreators: CreatorStat[];
   topProducts: ProductStat[];
+  topPlatforms: TopPlatforms;
 };

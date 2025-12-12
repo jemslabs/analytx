@@ -5,6 +5,9 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const userId = await getToken();
+    if(!userId){
+      return NextResponse.json({msg: "UNAUTHORIZED"}, {status: 400})
+    }
     const user = await prisma.user.findUnique({
       where: {
         id: userId,

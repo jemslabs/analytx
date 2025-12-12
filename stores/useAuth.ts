@@ -37,6 +37,7 @@ const useAuthStore = create<useAuthStoreType>((set) => ({
       const res = await axios.post("/api/auth/signup", data);
 
       if (res.status === 200) {
+        queryClient.clear();
         toast.success("Account created successfully");
 
         set({ user: res.data, isUserLoading: false });

@@ -53,7 +53,9 @@ export async function POST(req: Request) {
 
     // 3. Compute today's date (no time)
     const now = new Date();
-    const dateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateOnly = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    );
 
     // 4. Upsert click counter
     await prisma.clickEvent.upsert({

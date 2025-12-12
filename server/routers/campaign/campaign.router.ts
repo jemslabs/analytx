@@ -189,9 +189,6 @@ getCampaignOverview: brandProcedure
 
       const campaignId = input.campaignId;
 
-      // ------------------------------------------------
-      // 1. TOTAL SALES / CLICKS / REVENUE / CREATORS / PRODUCTS
-      // ------------------------------------------------
       const [salesCount, clicksAgg, revenueAgg, creators, products] =
         await Promise.all([
           prisma.saleEvent.count({
@@ -218,9 +215,6 @@ getCampaignOverview: brandProcedure
       const conversionPercentage =
         totalClicks > 0 ? (salesCount / totalClicks) * 100 : 0;
 
-      // ------------------------------------------------
-      // 2. SALES OVER TIME
-      // ------------------------------------------------
       const salesOverTime = await prisma.saleEvent.groupBy({
         by: ["purchasedAt"],
         _count: { id: true },
@@ -228,9 +222,6 @@ getCampaignOverview: brandProcedure
         orderBy: { purchasedAt: "asc" },
       });
 
-      // ------------------------------------------------
-      // 3. CLICKS OVER TIME
-      // ------------------------------------------------
       const clicksOverTime = await prisma.clickEvent.groupBy({
         by: ["date"],
         _sum: { count: true },
@@ -238,9 +229,6 @@ getCampaignOverview: brandProcedure
         orderBy: { date: "asc" },
       });
 
-      // ------------------------------------------------
-      // 4. TOP CREATORS
-      // ------------------------------------------------
       const topCreatorsRaw = await prisma.campaignMember.findMany({
         where: { campaignId },
         include: {
@@ -261,9 +249,6 @@ getCampaignOverview: brandProcedure
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 10);
 
-      // ------------------------------------------------
-      // 5. TOP PRODUCTS (SALES + REVENUE ONLY)
-      // ------------------------------------------------
       const productList = await prisma.campaignProduct.findMany({
         where: { campaignId },
         include: {
@@ -283,9 +268,39 @@ getCampaignOverview: brandProcedure
         .sort((a, b) => b.sales - a.sales)
         .slice(0, 10);
 
-      // ------------------------------------------------
-      // RETURN
-      // ------------------------------------------------
+      // -------------------------------------------
+      // NEW FEATURE: TOP PLATFORMS (CLICKS + SALES)
+      // -------------------------------------------
+      const platformClicks = await prisma.clickEvent.groupBy({
+        by: ["platform"],
+        _sum: { count: true },
+        where: { member: { campaignId } },
+      });
+
+      const platformSales = await prisma.saleEvent.groupBy({
+        by: ["platform"],
+        _count: { id: true },
+        where: { member: { campaignId } },
+      });
+
+      const topPlatforms = {
+        clicks: platformClicks
+          .map((p) => ({
+            platform: p.platform,
+            clicks: p._sum.count ?? 0,
+          }))
+          .sort((a, b) => b.clicks - a.clicks)
+          .slice(0, 10),
+
+        sales: platformSales
+          .map((p) => ({
+            platform: p.platform,
+            sales: p._count.id ?? 0,
+          }))
+          .sort((a, b) => b.sales - a.sales)
+          .slice(0, 10),
+      };
+
       return {
         success: true,
         data: {
@@ -295,11 +310,11 @@ getCampaignOverview: brandProcedure
           conversionPercentage,
           creators,
           products,
-
           salesOverTime,
           clicksOverTime,
           topCreators,
           topProducts,
+          topPlatforms,
         },
       };
     } catch (err) {
