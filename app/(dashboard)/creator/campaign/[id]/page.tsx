@@ -10,7 +10,7 @@ function CreatorCampaign() {
     const router = useRouter();
 
     const campaignMemberId = Number(id);
-    const ReferralCodes = dynamic(() => import("../_components/ReferralCodes"), {
+    const ReferralCodes = dynamic(() => import("../../_components/ReferralCodes"), {
         ssr: false,
         loading: () => (
             <div className="flex items-center justify-center h-64">
@@ -18,6 +18,15 @@ function CreatorCampaign() {
             </div>
         ),
     });
+
+    const Overview = dynamic(() => import("../../_components/Overview"), {
+        ssr: false,
+        loading: () => (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="animate-spin w-5 h-5" />
+            </div>
+        ),
+    })
     return (
         <div>
             <div>
@@ -25,7 +34,7 @@ function CreatorCampaign() {
                     type="button"
                     variant="ghost"
                     className="p-0 flex items-center gap-1 text-gray-600"
-                    onClick={() => router.push("/brand/campaigns")}
+                    onClick={() => router.push("/creator")}
                 >
                     <ChevronLeft className="w-4 h-4" /> Back to Campaigns
                 </Button>
@@ -34,14 +43,12 @@ function CreatorCampaign() {
             <Tabs className="mt-2" defaultValue="overview">
                 <TabsList className="gap-2 ">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="performance">Performance</TabsTrigger>
                     <TabsTrigger value="referralCodes">Referral Codes</TabsTrigger>
-                    <TabsTrigger value="payouts">Payouts</TabsTrigger>
                 </TabsList>
 
-                {/* <TabsContent value="overview">
-                        <Overview campaignId={campaignId} />
-                    </TabsContent> */}
+                <TabsContent value="overview">
+                        <Overview campaignMemberId={campaignMemberId} />
+                    </TabsContent>
                 <TabsContent value="referralCodes">
                     <ReferralCodes campaignMemberId={campaignMemberId} />
                 </TabsContent>

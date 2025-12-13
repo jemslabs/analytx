@@ -2,7 +2,6 @@
 
 import {
   LayoutDashboard,
-  Settings,
   PanelLeftOpen,
   PanelLeftClose,
   ChevronsUpDown,
@@ -24,10 +23,8 @@ export default function CreatorSidebar() {
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false);
   const navItems = [
-    { label: "Overview", icon: LayoutDashboard, href: `/creator` },
-    { label: "Campaigns", icon: Megaphone, href: `/creator/campaigns` },
+    { label: "Campaigns", icon: Megaphone, href: `/creator` },
     { label: "Invites", icon: Inbox, href: `/creator/invites` },
-    { label: "Settings", icon: Settings, href: `/creator/settings` },
   ];
 
 
@@ -44,12 +41,16 @@ export default function CreatorSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
 
-          // Fix: match exact route OR first segment
-          const pathSegment = pathname.split("/")[2] ?? "";
-          const itemSegment = item.href.split("/")[2] ?? "";
+          let active = false;
 
-          const active =
-            pathname === item.href || pathSegment === itemSegment;
+          if (item.href === "/creator") {
+            // Active on /creator or /creator/campaign/... but NOT /creator/invites
+            active =
+              pathname === "/creator" || pathname.startsWith("/creator/campaign");
+          } else if (item.href === "/creator/invites") {
+            // Active only on /creator/invites
+            active = pathname === "/creator/invites";
+          }
 
           return (
             <button
@@ -86,6 +87,10 @@ export default function CreatorSidebar() {
           );
         })}
       </nav>
+
+
+
+
 
       <button
         onClick={() => setCollapsed(!collapsed)}

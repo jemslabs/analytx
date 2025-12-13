@@ -28,7 +28,6 @@ export default function CreatorAnalytics() {
     );
 
   /* ---------------- loading ---------------- */
-
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -56,7 +55,6 @@ export default function CreatorAnalytics() {
   const analytics = data.data;
 
   /* ---------------- derived ---------------- */
-
   const platforms = Array.from(
     new Set([
       ...analytics.topPlatforms.clicks.map((p) => p.platform),
@@ -71,7 +69,6 @@ export default function CreatorAnalytics() {
       analytics.topPlatforms.sales.find((p) => p.platform === platform)
         ?.sales ?? 0,
   }));
-
 
   return (
     <div className="space-y-10">
@@ -103,14 +100,12 @@ export default function CreatorAnalytics() {
           title="Revenue"
           value={`₹${analytics.revenue.toLocaleString()}`}
           icon={IndianRupee}
-
         />
 
         <StatCard
           title="Creator Payout"
           value={`₹${analytics.payout.toLocaleString()}`}
           icon={IndianRupee}
-
         />
 
         <StatCard
@@ -148,35 +143,38 @@ export default function CreatorAnalytics() {
       </div>
 
       {/* PRODUCT PERFORMANCE */}
-      <Card className="p-6 rounded-3xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Product Performance</h3>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-muted-foreground">
-                <th className="py-3 text-left font-medium">Product</th>
-                <th className="py-3 text-right font-medium">Sales</th>
-                <th className="py-3 text-right font-medium">Revenue</th>
+      <Card className="p-6 bg-transparent border-none shadow-none">
+        <h3 className="font-semibold text-xl">Product Performance</h3>
+        <div className="overflow-x-auto rounded-xl">
+          <table className="min-w-full divide-y divide-gray-200 border-collapse">
+            <thead className="bg-black text-white">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Product
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
+                  Sales
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
+                  Revenue
+                </th>
               </tr>
             </thead>
-
-            <tbody>
-              {analytics.topProducts.map((p) => (
+            <tbody className="divide-y divide-gray-200">
+              {analytics.topProducts.map((p, i) => (
                 <tr
                   key={p.productId}
-                  className="border-b last:border-none hover:bg-muted/50 transition"
+                  className={`border-b hover:bg-gray-50 transition ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
                 >
-                  <td className="py-3 font-medium">{p.name}</td>
-                  <td className="py-3 text-right tabular-nums">{p.sales}</td>
-                  <td className="py-3 text-right tabular-nums font-semibold">
+                  <td className="px-6 py-3 font-medium">{p.name}</td>
+                  <td className="px-6 py-3 text-right tabular-nums">{p.sales}</td>
+                  <td className="px-6 py-3 text-right tabular-nums font-semibold">
                     ₹{p.revenue.toLocaleString()}
                   </td>
                 </tr>
               ))}
-
               {analytics.topProducts.length === 0 && (
                 <tr>
                   <td
@@ -193,35 +191,47 @@ export default function CreatorAnalytics() {
       </Card>
 
       {/* PLATFORM CONTRIBUTION */}
-      <Card className="p-6 rounded-3xl">
-        <h3 className="font-semibold mb-4">Platform Contribution</h3>
+      <Card className="p-6 bg-transparent border-none shadow-none">
+        <h3 className="font-semibold text-xl">Platform Contribution</h3>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-muted-foreground">
-                <th className="py-3 text-left font-medium">Platform</th>
-                <th className="py-3 text-right font-medium">Clicks</th>
-                <th className="py-3 text-right font-medium">Sales</th>
+        <div className="overflow-x-auto rounded-xl">
+          <table className="min-w-full divide-y divide-gray-200 border-collapse">
+            <thead className="bg-black text-white">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Platform
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
+                  Clicks
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
+                  Sales
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
+                  Conversion Rate
+                </th>
               </tr>
             </thead>
-
-            <tbody>
-              {platforms.map(({ platform, clicks, sales }) => (
+            <tbody className="divide-y divide-gray-200">
+              {platforms.map(({ platform, clicks, sales }, i) => (
                 <tr
                   key={platform}
-                  className="border-b last:border-none hover:bg-muted/50 transition"
+                  className={`border-b hover:bg-gray-50 transition ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
                 >
-                  <td className="py-3 font-medium capitalize">{platform}</td>
-                  <td className="py-3 text-right tabular-nums">{clicks}</td>
-                  <td className="py-3 text-right tabular-nums">{sales}</td>
+                  <td className="px-6 py-3 font-medium capitalize">{platform}</td>
+                  <td className="px-6 py-3 text-right tabular-nums">{clicks}</td>
+                  <td className="px-6 py-3 text-right tabular-nums">{sales}</td>
+                  <td className="px-6 py-3 text-right tabular-nums font-semibold">
+                    {clicks > 0 ? ((sales / clicks) * 100).toFixed(1) : 0}%
+                  </td>
                 </tr>
               ))}
-
               {platforms.length === 0 && (
                 <tr>
                   <td
-                    colSpan={3}
+                    colSpan={4}
                     className="py-6 text-center text-muted-foreground"
                   >
                     No platform data available
@@ -232,7 +242,6 @@ export default function CreatorAnalytics() {
           </table>
         </div>
       </Card>
-
     </div>
   );
 }

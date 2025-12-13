@@ -48,6 +48,9 @@ function CreatorInvites() {
                 Brand
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
+                Payout
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase">
@@ -61,21 +64,21 @@ function CreatorInvites() {
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <tr key={i}>
-                  <td colSpan={5} className="px-6 py-4">
+                  <td colSpan={6} className="px-6 py-4">
                     <Skeleton className="h-4 w-full" />
                   </td>
                 </tr>
               ))
             ) : error ? (
               <tr>
-                <td colSpan={5} className="px-6 py-4 text-center text-red-600">
+                <td colSpan={6} className="px-6 py-4 text-center text-red-600">
                   {error.message}
                 </td>
               </tr>
             ) : invites.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-6 py-12 text-center text-gray-500 space-y-2"
                 >
                   <Mail className="h-8 w-8 mx-auto text-gray-400" />
@@ -84,57 +87,75 @@ function CreatorInvites() {
                 </td>
               </tr>
             ) : (
-              invites.map((inv) => (
-                <tr
-                  key={inv.id}
-                  className="hover:bg-gray-50 transition cursor-pointer"
-                >
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    {inv.campaign?.name ?? "Unknown Campaign"}
-                  </td>
+              invites.map((inv) => {
+                const campaign = inv.campaign;
 
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {inv.campaign?.brand?.name ?? "Unknown Brand"}
-                  </td>
+                const cpsText =
+                  (campaign.payoutModel === "CPS" || campaign.payoutModel === "BOTH") && campaign.cpsValue
+                    ? campaign.cpsCommissionType === "PERCENTAGE"
+                      ? `${campaign.cpsValue}% CPS`
+                      : `₹${campaign.cpsValue} CPS`
+                    : null;
 
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={
-                        inv.status === "PENDING"
-                          ? "text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full"
-                          : "text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full"
-                      }
-                    >
-                      {inv.status}
-                    </span>
-                  </td>
+                const cpcText =
+                  (campaign.payoutModel === "CPC" || campaign.payoutModel === "BOTH") && campaign.cpcValue
+                    ? `₹${campaign.cpcValue} CPC`
+                    : null;
 
-                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                    {new Date(inv.createdAt).toLocaleDateString()}
-                  </td>
+                const payoutText = [cpsText, cpcText].filter(Boolean).join(" + ") || "-";
 
-                  <td className="px-6 py-4 text-center">
+                return (
+                  <tr key={inv.id} className="hover:bg-gray-50 transition cursor-pointer">
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                      {campaign?.name ?? "Unknown Campaign"}
+                    </td>
 
-                    {inv.status === "PENDING" &&
-                      <Button
-                        variant="ghost"
-                        className="text-green-600 hover:text-green-600 transition rounded-full bg-green-500/10"
-                        onClick={() => {
-                          setLoadingId(inv.id);
-                          acceptCampaignInvite.mutate({ campaignInviteId: inv.id });
-                        }}
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {campaign?.brand?.name ?? "Unknown Brand"}
+                    </td>
+
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                      {payoutText}
+                    </td>
+
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={
+                          inv.status === "PENDING"
+                            ? "text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full"
+                            : "text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full"
+                        }
                       >
-                        {Number(loadingId) === inv.id ? (
-                          <Loader2 className="animate-spin" size={16} />
-                        ) : (
-                          <Check className="w-5 h-5" />
-                        )}
-                      </Button>
+                        {inv.status}
+                      </span>
+                    </td>
 
-                    }
-                  </td>
-                </tr>
-              ))
+                    <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                      {new Date(inv.createdAt).toLocaleDateString()}
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      {inv.status === "PENDING" && (
+                        <Button
+                          variant="ghost"
+                          className="text-green-600 hover:text-green-600 transition rounded-full bg-green-500/10"
+                          onClick={() => {
+                            setLoadingId(inv.id);
+                            acceptCampaignInvite.mutate({ campaignInviteId: inv.id });
+                          }}
+                        >
+                          {Number(loadingId) === inv.id ? (
+                            <Loader2 className="animate-spin" size={16} />
+                          ) : (
+                            <Check className="w-5 h-5" />
+                          )}
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+
             )}
           </tbody>
         </table>
