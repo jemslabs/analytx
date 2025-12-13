@@ -115,7 +115,7 @@ export default function CreateCampaign() {
             >
                 {/* BASIC INFO */}
                 <div className="space-y-4">
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                         <Label>
                             Campaign Name <span className="text-red-600">*</span>
                         </Label>
@@ -127,7 +127,7 @@ export default function CreateCampaign() {
                             className="h-12 rounded-xl border-gray-300"
                         />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                         <Label>
                             Redirect URL <span className="text-red-600">*</span>
                         </Label>

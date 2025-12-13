@@ -6,7 +6,7 @@ import {
 } from "@/server/utils/zod";
 import { router, protectedProcedure, brandProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
-import { generateApiKey, hashApiKey } from "@/lib/tools";
+import { generateApiKey, hashApiKey, topNWithOther } from "@/lib/tools";
 
 export const profileRouter = router({
   createBrandProfile: protectedProcedure
@@ -85,7 +85,6 @@ export const profileRouter = router({
             message: "Brand profile not found.",
           });
         }
-
 
         const updated = await prisma.brandProfile.update({
           where: { id: existing.id },
@@ -178,7 +177,7 @@ export const profileRouter = router({
 
         const updated = await prisma.creatorProfile.update({
           where: { id: existing.id },
-          data: input
+          data: input,
         });
 
         return {
@@ -230,4 +229,126 @@ export const profileRouter = router({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
   }),
+
+  getBrandOverview: brandProcedure.query(async ({ ctx }) => {
+  const prisma = ctx.prisma;
+  const userId = ctx.userId;
+
+  try {
+    const brand = await prisma.brandProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+
+    if (!brand) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Brand profile not found",
+      });
+    }
+
+    const brandId = brand.id;
+
+    const [
+      totalCampaigns,
+      activeCampaigns,
+      totalProducts,
+
+      salesAgg,
+      clicksAgg,
+
+      campaigns,
+      salesOverTime,
+      clicksOverTime,
+    ] = await Promise.all([
+      prisma.campaign.count({ where: { brandId } }),
+
+      prisma.campaign.count({
+        where: { brandId, status: "ACTIVE" },
+      }),
+
+      prisma.product.count({ where: { brandId } }),
+
+      prisma.saleEvent.aggregate({
+        _sum: { salePrice: true },
+        _count: { id: true },
+        where: { member: { campaign: { brandId } } },
+      }),
+
+      prisma.clickEvent.aggregate({
+        _sum: { count: true },
+        where: { member: { campaign: { brandId } } },
+      }),
+
+      prisma.campaign.findMany({
+        where: { brandId },
+        include: {
+          members: {
+            include: {
+              sales: true,
+              clicks: true,
+            },
+          },
+        },
+      }),
+
+      prisma.saleEvent.groupBy({
+        by: ["purchasedAt"],
+        _count: { id: true },
+        where: { member: { campaign: { brandId } } },
+        orderBy: { purchasedAt: "asc" },
+      }),
+
+      prisma.clickEvent.groupBy({
+        by: ["date"],
+        _sum: { count: true },
+        where: { member: { campaign: { brandId } } },
+        orderBy: { date: "asc" },
+      }),
+    ]);
+
+    const totalSales = salesAgg._count.id ?? 0;
+    const totalRevenue = salesAgg._sum.salePrice ?? 0;
+    const totalClicks = clicksAgg._sum.count ?? 0;
+
+    const campaignStats = campaigns.map((c) => {
+      const sales = c.members.flatMap((m) => m.sales);
+      const clicks = c.members.flatMap((m) => m.clicks);
+
+      return {
+        campaignId: c.id,
+        name: c.name,
+        sales: sales.length,
+        clicks: clicks.reduce((s, x) => s + x.count, 0),
+        revenue: sales.reduce((s, x) => s + x.salePrice, 0),
+      };
+    });
+
+    const topCampaigns = {
+      revenue: topNWithOther(campaignStats, "revenue"),
+      sales: topNWithOther(campaignStats, "sales"),
+      clicks: topNWithOther(campaignStats, "clicks"),
+    };
+
+    return {
+      success: true,
+      data: {
+        totalCampaigns,
+        activeCampaigns,
+        totalProducts,
+
+        sales: totalSales,
+        clicks: totalClicks,
+        revenue: totalRevenue,
+
+        salesOverTime,
+        clicksOverTime,
+        topCampaigns,
+      },
+    };
+  } catch (err) {
+    if (err instanceof TRPCError) throw err;
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+  }
+})
 });

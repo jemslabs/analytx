@@ -160,6 +160,15 @@ export default function CampaignOverviewAnalytics({
 
   const activePlatformData =
     platformMetric === "clicks" ? topPlatforms.clicks : topPlatforms.sales;
+  const maxValue =
+    filteredSeries.length > 0
+      ? Math.max(...filteredSeries.map(d => Math.max(d.sales, d.clicks)))
+      : 0;
+
+  const chartHeight = Math.min(
+    500,
+    Math.max(300, 50 + maxValue * 5)
+  );
 
   return (
     <div className="space-y-8">
@@ -208,9 +217,7 @@ export default function CampaignOverviewAnalytics({
         <div
           className="w-full"
           style={{
-            minHeight: 300,  // chart is visible even for small data
-            maxHeight: 500,  // prevents chart from being too tall
-            height: Math.min(500, 50 + (Math.max(...filteredSeries.map(d => Math.max(d.sales, d.clicks))) * 5)), // dynamic based on max value
+           height: chartHeight
           }}
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -291,10 +298,10 @@ export default function CampaignOverviewAnalytics({
                   .sort((a, b) => b[creatorsMetric] - a[creatorsMetric])}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" stroke="#111827" tick={{ fill: "#111827" }} />
-                <YAxis stroke="#111827" tick={{ fill: "#111827" }} />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip />
-                <Bar dataKey={creatorsMetric} fill="#4f46e5" />
+                <Bar dataKey={creatorsMetric} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -337,10 +344,10 @@ export default function CampaignOverviewAnalytics({
                   .sort((a, b) => b[productsMetric] - a[productsMetric])}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" stroke="#111827" tick={{ fill: "#111827" }} />
-                <YAxis stroke="#111827" tick={{ fill: "#111827" }} />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip />
-                <Bar dataKey={productsMetric} fill="#4f46e5" />
+                <Bar dataKey={productsMetric} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -381,10 +388,10 @@ export default function CampaignOverviewAnalytics({
                 }))}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" stroke="#111827" tick={{ fill: "#111827" }} />
-                <YAxis stroke="#111827" tick={{ fill: "#111827" }} />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip />
-                <Bar dataKey={platformMetric} fill="#4f46e5" />
+                <Bar dataKey={platformMetric} />
               </BarChart>
             </ResponsiveContainer>
           </div>

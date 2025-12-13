@@ -11,16 +11,33 @@ export function generateApiKey() {
 export function hashApiKey(apiKey: string) {
   return crypto.createHash("sha256").update(apiKey).digest("hex");
 }
-// let payout = 0;
 
-// if (campaign.payoutModel === "CPS" || campaign.payoutModel === "BOTH") {
-//   payout += campaign.cpsCommissionType === "PERCENTAGE"
-//     ? sale.salePrice * (campaign.cpsValue / 100)
-//     : campaign.cpsValue;
-// }
+export function topNWithOther<T extends Record<string, any>>(
+  items: T[],
+  metricKey: keyof T,
+  n = 3,
+  otherLabel = "Other"
+) {
+  const sorted = [...items].sort(
+    (a, b) => (b[metricKey] as number) - (a[metricKey] as number)
+  );
 
-// if (campaign.payoutModel === "CPC" || campaign.payoutModel === "BOTH") {
-//   payout += clicks * campaign.cpcValue;
-// }
+  const top = sorted.slice(0, n);
+  const rest = sorted.slice(n);
 
+  if (rest.length === 0) return top;
 
+  const otherValue = rest.reduce(
+    (sum, item) => sum + (item[metricKey] as number),
+    0
+  );
+
+  return [
+    ...top,
+    {
+      ...Object.fromEntries(Object.keys(top[0]).map((k) => [k, 0])),
+      name: otherLabel,
+      [metricKey]: otherValue,
+    },
+  ];
+}
