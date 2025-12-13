@@ -9,6 +9,9 @@ import {
   SalesOverTimeItem,
   ClicksOverTimeItem,
   OverviewShape,
+  CreatorMetric,
+  ProductMetric,
+  PlatformMetric,
 } from "@/lib/types";
 
 import {
@@ -75,14 +78,14 @@ export default function CampaignOverviewAnalytics({
   );
 
   const [creatorsMetric, setCreatorsMetric] = useState<
-    "revenue" | "clicks" | "sales"
+    CreatorMetric
   >("revenue");
 
-  const [productsMetric, setProductsMetric] = useState<"sales" | "revenue">(
+  const [productsMetric, setProductsMetric] = useState<ProductMetric>(
     "sales"
   );
 
-  const [platformMetric, setPlatformMetric] = useState<"clicks" | "sales">(
+  const [platformMetric, setPlatformMetric] = useState<PlatformMetric>(
     "clicks"
   );
 
@@ -149,8 +152,10 @@ export default function CampaignOverviewAnalytics({
 
   if (!overview) return <div>No data found.</div>;
 
-  const creators = overview.topCreators;
-  const products = overview.topProducts;
+  const creators = overview.topCreators[creatorsMetric];
+
+  const products = overview.topProducts[productsMetric];
+
   const topPlatforms = overview.topPlatforms;
 
   const activePlatformData =
@@ -177,66 +182,66 @@ export default function CampaignOverviewAnalytics({
       </div>
 
       {/* SALES + CLICKS CHART */}
-<Card className="p-4 rounded-3xl">
-  {/* Header with filter */}
-  <div className="flex justify-between items-center mb-2">
-    <h3 className="font-semibold text-gray-900">Sales and Clicks Overtime</h3>
-    <div className="flex gap-2">
-      <Button
-        size="sm"
-        variant={range === "7D" ? "default" : "ghost"}
-        onClick={() => setRange("7D")}
-      >
-        7D
-      </Button>
-      <Button
-        size="sm"
-        variant={range === "30D" ? "default" : "ghost"}
-        onClick={() => setRange("30D")}
-      >
-        30D
-      </Button>
-    </div>
-  </div>
+      <Card className="p-4 rounded-3xl">
+        {/* Header with filter */}
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-semibold text-gray-900">Sales and Clicks Overtime</h3>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={range === "7D" ? "default" : "ghost"}
+              onClick={() => setRange("7D")}
+            >
+              7D
+            </Button>
+            <Button
+              size="sm"
+              variant={range === "30D" ? "default" : "ghost"}
+              onClick={() => setRange("30D")}
+            >
+              30D
+            </Button>
+          </div>
+        </div>
 
-  {/* Chart wrapper with dynamic but bounded height */}
-  <div
-    className="w-full"
-    style={{
-      minHeight: 300,  // chart is visible even for small data
-      maxHeight: 500,  // prevents chart from being too tall
-      height: Math.min(500, 50 + (Math.max(...filteredSeries.map(d => Math.max(d.sales, d.clicks))) * 5)), // dynamic based on max value
-    }}
-  >
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={filteredSeries}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-        <XAxis dataKey="date" stroke="#111827" tick={{ fill: "#111827" }} />
-        <YAxis
-          stroke="#111827"
-          tick={{ fill: "#111827" }}
-          domain={[0, (dataMax: number) => Math.max(20, dataMax + 5)]}
-        />
-        <Tooltip />
-        <Legend />
-        <Line
-          type="monotone"
-          dataKey="sales"
-          stroke="#4f46e5"
-          strokeWidth={2}
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="clicks"
-          stroke="#16a34a"
-          strokeWidth={2}
-          dot={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  </div>
-</Card>
+        {/* Chart wrapper with dynamic but bounded height */}
+        <div
+          className="w-full"
+          style={{
+            minHeight: 300,  // chart is visible even for small data
+            maxHeight: 500,  // prevents chart from being too tall
+            height: Math.min(500, 50 + (Math.max(...filteredSeries.map(d => Math.max(d.sales, d.clicks))) * 5)), // dynamic based on max value
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={filteredSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="date" stroke="#111827" tick={{ fill: "#111827" }} />
+              <YAxis
+                stroke="#111827"
+                tick={{ fill: "#111827" }}
+                domain={[0, (dataMax: number) => Math.max(20, dataMax + 5)]}
+              />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="sales"
+                stroke="#4f46e5"
+                strokeWidth={2}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="clicks"
+                stroke="#16a34a"
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
 
 
       {/* TOP CREATORS + TOP PRODUCTS + TOP PLATFORMS */}
@@ -370,7 +375,7 @@ export default function CampaignOverviewAnalytics({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={activePlatformData.map((p) => ({
-                  name: p.platform,
+                  name: p.name,
                   clicks: "clicks" in p ? p.clicks : 0,
                   sales: "sales" in p ? p.sales : 0,
                 }))}

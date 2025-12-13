@@ -43,4 +43,3 @@ next-env.d.ts
 /app/generated/prisma
 /prisma/schema.txt
 /lib/generated/prisma
-/tasks.txt

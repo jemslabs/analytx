@@ -13,6 +13,37 @@ import { router, brandProcedure, creatorProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { generateUniqueReferralCode } from "@/lib/tools";
 import { z } from "zod";
+
+function topNWithOther<T extends Record<string, any>>(
+  items: T[],
+  metricKey: keyof T,
+  n = 3,
+  otherLabel = "Other"
+) {
+  const sorted = [...items].sort(
+    (a, b) => (b[metricKey] as number) - (a[metricKey] as number)
+  );
+
+  const top = sorted.slice(0, n);
+  const rest = sorted.slice(n);
+
+  if (rest.length === 0) return top;
+
+  const otherValue = rest.reduce(
+    (sum, item) => sum + (item[metricKey] as number),
+    0
+  );
+
+  return [
+    ...top,
+    {
+      ...Object.fromEntries(Object.keys(top[0]).map((k) => [k, 0])),
+      name: otherLabel,
+      [metricKey]: otherValue,
+    },
+  ];
+}
+
 export const campaignRouter = router({
   createCampaign: brandProcedure
     .input(createCampaignSchema)
@@ -155,174 +186,174 @@ export const campaignRouter = router({
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
   }),
-getCampaignOverview: brandProcedure
-  .input(z.object({ campaignId: z.number() }))
-  .query(async ({ ctx, input }) => {
-    const prisma = ctx.prisma;
-    const userId = ctx.userId;
+  getCampaignOverview: brandProcedure
+    .input(z.object({ campaignId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const prisma = ctx.prisma;
+      const userId = ctx.userId;
 
-    try {
-      const brand = await prisma.brandProfile.findUnique({
-        where: { userId },
-      });
-
-      if (!brand) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Brand profile not found",
+      try {
+        const brand = await prisma.brandProfile.findUnique({
+          where: { userId },
         });
-      }
 
-      const campaign = await prisma.campaign.findFirst({
-        where: {
-          id: input.campaignId,
-          brandId: brand.id,
-        },
-      });
+        if (!brand) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Brand profile not found",
+          });
+        }
 
-      if (!campaign) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Campaign not found",
+        const campaign = await prisma.campaign.findFirst({
+          where: {
+            id: input.campaignId,
+            brandId: brand.id,
+          },
         });
-      }
 
-      const campaignId = input.campaignId;
+        if (!campaign) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Campaign not found",
+          });
+        }
 
-      const [salesCount, clicksAgg, revenueAgg, creators, products] =
-        await Promise.all([
-          prisma.saleEvent.count({
-            where: { member: { campaignId } },
-          }),
+        const campaignId = input.campaignId;
 
-          prisma.clickEvent.aggregate({
-            _sum: { count: true },
-            where: { member: { campaignId } },
-          }),
+        const [salesCount, clicksAgg, revenueAgg, creators, products] =
+          await Promise.all([
+            prisma.saleEvent.count({
+              where: { member: { campaignId } },
+            }),
 
-          prisma.saleEvent.aggregate({
-            _sum: { salePrice: true },
-            where: { member: { campaignId } },
-          }),
+            prisma.clickEvent.aggregate({
+              _sum: { count: true },
+              where: { member: { campaignId } },
+            }),
 
-          prisma.campaignMember.count({ where: { campaignId } }),
+            prisma.saleEvent.aggregate({
+              _sum: { salePrice: true },
+              where: { member: { campaignId } },
+            }),
 
-          prisma.campaignProduct.count({ where: { campaignId } }),
-        ]);
+            prisma.campaignMember.count({ where: { campaignId } }),
 
-      const totalClicks = clicksAgg._sum.count ?? 0;
-      const totalRevenue = revenueAgg._sum.salePrice ?? 0;
-      const conversionPercentage =
-        totalClicks > 0 ? (salesCount / totalClicks) * 100 : 0;
+            prisma.campaignProduct.count({ where: { campaignId } }),
+          ]);
 
-      const salesOverTime = await prisma.saleEvent.groupBy({
-        by: ["purchasedAt"],
-        _count: { id: true },
-        where: { member: { campaignId } },
-        orderBy: { purchasedAt: "asc" },
-      });
+        const totalClicks = clicksAgg._sum.count ?? 0;
+        const totalRevenue = revenueAgg._sum.salePrice ?? 0;
+        const conversionPercentage =
+          totalClicks > 0 ? (salesCount / totalClicks) * 100 : 0;
 
-      const clicksOverTime = await prisma.clickEvent.groupBy({
-        by: ["date"],
-        _sum: { count: true },
-        where: { member: { campaignId } },
-        orderBy: { date: "asc" },
-      });
+        const salesOverTime = await prisma.saleEvent.groupBy({
+          by: ["purchasedAt"],
+          _count: { id: true },
+          where: { member: { campaignId } },
+          orderBy: { purchasedAt: "asc" },
+        });
 
-      const topCreatorsRaw = await prisma.campaignMember.findMany({
-        where: { campaignId },
-        include: {
-          creator: true,
-          sales: true,
-          clicks: true,
-        },
-      });
+        const clicksOverTime = await prisma.clickEvent.groupBy({
+          by: ["date"],
+          _sum: { count: true },
+          where: { member: { campaignId } },
+          orderBy: { date: "asc" },
+        });
 
-      const topCreators = topCreatorsRaw
-        .map((m) => ({
+        const topCreatorsRaw = await prisma.campaignMember.findMany({
+          where: { campaignId },
+          include: {
+            creator: true,
+            sales: true,
+            clicks: true,
+          },
+        });
+
+        const creatorsStats = topCreatorsRaw.map((m) => ({
           creatorId: m.creatorId,
           name: m.creator.name,
           sales: m.sales.length,
           clicks: m.clicks.reduce((sum, c) => sum + c.count, 0),
           revenue: m.sales.reduce((sum, s) => sum + s.salePrice, 0),
-        }))
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 10);
+        }));
 
-      const productList = await prisma.campaignProduct.findMany({
-        where: { campaignId },
-        include: {
-          product: true,
-          sales: true,
-        },
-      });
+        const topCreators = {
+          revenue: topNWithOther(creatorsStats, "revenue"),
+          clicks: topNWithOther(creatorsStats, "clicks"),
+          sales: topNWithOther(creatorsStats, "sales"),
+        };
 
-      const productStats = productList.map((p) => ({
-        productId: p.productId,
-        name: p.product.name,
-        sales: p.sales.length,
-        revenue: p.sales.reduce((sum, s) => sum + s.salePrice, 0),
-      }));
+        const productList = await prisma.campaignProduct.findMany({
+          where: { campaignId },
+          include: {
+            product: true,
+            sales: true,
+          },
+        });
 
-      const topProducts = productStats
-        .sort((a, b) => b.sales - a.sales)
-        .slice(0, 10);
+        const productStats = productList.map((p) => ({
+          productId: p.productId,
+          name: p.product.name,
+          sales: p.sales.length,
+          revenue: p.sales.reduce((sum, s) => sum + s.salePrice, 0),
+        }));
 
-      // -------------------------------------------
-      // NEW FEATURE: TOP PLATFORMS (CLICKS + SALES)
-      // -------------------------------------------
-      const platformClicks = await prisma.clickEvent.groupBy({
-        by: ["platform"],
-        _sum: { count: true },
-        where: { member: { campaignId } },
-      });
+        const topProducts = {
+          sales: topNWithOther(productStats, "sales"),
+          revenue: topNWithOther(productStats, "revenue"),
+        };
 
-      const platformSales = await prisma.saleEvent.groupBy({
-        by: ["platform"],
-        _count: { id: true },
-        where: { member: { campaignId } },
-      });
+        // -------------------------------------------
+        // NEW FEATURE: TOP PLATFORMS (CLICKS + SALES)
+        // -------------------------------------------
+        const platformClicks = await prisma.clickEvent.groupBy({
+          by: ["platform"],
+          _sum: { count: true },
+          where: { member: { campaignId } },
+        });
 
-      const topPlatforms = {
-        clicks: platformClicks
-          .map((p) => ({
-            platform: p.platform,
-            clicks: p._sum.count ?? 0,
-          }))
-          .sort((a, b) => b.clicks - a.clicks)
-          .slice(0, 10),
+        const platformSales = await prisma.saleEvent.groupBy({
+          by: ["platform"],
+          _count: { id: true },
+          where: { member: { campaignId } },
+        });
 
-        sales: platformSales
-          .map((p) => ({
-            platform: p.platform,
-            sales: p._count.id ?? 0,
-          }))
-          .sort((a, b) => b.sales - a.sales)
-          .slice(0, 10),
-      };
+        const platformClicksMapped = platformClicks.map((p) => ({
+          name: p.platform,
+          clicks: p._sum.count ?? 0,
+        }));
 
-      return {
-        success: true,
-        data: {
-          sales: salesCount,
-          clicks: totalClicks,
-          revenue: totalRevenue,
-          conversionPercentage,
-          creators,
-          products,
-          salesOverTime,
-          clicksOverTime,
-          topCreators,
-          topProducts,
-          topPlatforms,
-        },
-      };
-    } catch (err) {
-      if (err instanceof TRPCError) throw err;
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-    }
-  }),
+        const platformSalesMapped = platformSales.map((p) => ({
+          name: p.platform,
+          sales: p._count.id ?? 0,
+        }));
 
+        const topPlatforms = {
+          clicks: topNWithOther(platformClicksMapped, "clicks"),
+          sales: topNWithOther(platformSalesMapped, "sales"),
+        };
+
+        return {
+          success: true,
+          data: {
+            sales: salesCount,
+            clicks: totalClicks,
+            revenue: totalRevenue,
+            conversionPercentage,
+            creators,
+            products,
+            salesOverTime,
+            clicksOverTime,
+            topCreators,
+            topProducts,
+            topPlatforms,
+          },
+        };
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
 
   getCampaignDetails: brandProcedure
     .input(z.object({ campaignId: z.number() }))
@@ -1248,4 +1279,133 @@ getCampaignOverview: brandProcedure
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
+
+  getCreatorAnalytics: brandProcedure
+  .input(z.object({ campaignMemberId: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const prisma = ctx.prisma;
+    const memberId = input.campaignMemberId;
+
+    const member = await prisma.campaignMember.findUnique({
+      where: { id: memberId },
+      include: { campaign: true },
+    });
+
+    if (!member) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Creator not part of this campaign",
+      });
+    }
+
+    const campaign = member.campaign;
+
+    const [salesCount, clicksAgg, revenueAgg] = await Promise.all([
+      prisma.saleEvent.count({ where: { memberId } }),
+      prisma.clickEvent.aggregate({
+        _sum: { count: true },
+        where: { memberId },
+      }),
+      prisma.saleEvent.aggregate({
+        _sum: { salePrice: true },
+        where: { memberId },
+      }),
+    ]);
+
+    const totalClicks = clicksAgg._sum.count ?? 0;
+    const totalRevenue = revenueAgg._sum.salePrice ?? 0;
+    const conversionRate =
+      totalClicks > 0 ? (salesCount / totalClicks) * 100 : 0;
+
+    const salesOverTime = await prisma.saleEvent.groupBy({
+      by: ["purchasedAt"],
+      _count: { id: true },
+      where: { memberId },
+      orderBy: { purchasedAt: "asc" },
+    });
+
+    const clicksOverTime = await prisma.clickEvent.groupBy({
+      by: ["date"],
+      _sum: { count: true },
+      where: { memberId },
+      orderBy: { date: "asc" },
+    });
+
+    const memberProductStats = await prisma.saleEvent.groupBy({
+      by: ["campaignProductId"],
+      _count: { id: true },
+      _sum: { salePrice: true },
+      where: { memberId },
+    });
+
+    const products = await prisma.campaignProduct.findMany({
+      where: {
+        id: { in: memberProductStats.map((p) => p.campaignProductId) },
+      },
+      include: { product: true },
+    });
+
+    const topProducts = memberProductStats
+      .map((p) => ({
+        productId: p.campaignProductId,
+        name:
+          products.find((x) => x.id === p.campaignProductId)?.product.name ??
+          "Unknown Product",
+        sales: p._count.id,
+        revenue: p._sum.salePrice ?? 0,
+      }))
+      .sort((a, b) => b.sales - a.sales)
+      .slice(0, 10);
+
+    const platformClicks = await prisma.clickEvent.groupBy({
+      by: ["platform"],
+      _sum: { count: true },
+      where: { memberId },
+    });
+
+    const platformSales = await prisma.saleEvent.groupBy({
+      by: ["platform"],
+      _count: { id: true },
+      where: { memberId },
+    });
+
+    const topPlatforms = {
+      clicks: platformClicks
+        .map((p) => ({ platform: p.platform, clicks: p._sum.count ?? 0 }))
+        .sort((a, b) => b.clicks - a.clicks),
+      sales: platformSales
+        .map((p) => ({ platform: p.platform, sales: p._count.id ?? 0 }))
+        .sort((a, b) => b.sales - a.sales),
+    };
+
+    let payout = 0;
+
+    if (campaign.payoutModel === "CPS" || campaign.payoutModel === "BOTH") {
+      if (campaign.cpsCommissionType === "PERCENTAGE") {
+        payout += (campaign.cpsValue / 100) * totalRevenue;
+      } else {
+        payout += salesCount * campaign.cpsValue;
+      }
+    }
+
+    if (campaign.payoutModel === "CPC" || campaign.payoutModel === "BOTH") {
+      payout += totalClicks * (campaign.cpcValue ?? 0);
+    }
+
+    return {
+      success: true,
+      data: {
+        sales: salesCount,
+        clicks: totalClicks,
+        revenue: totalRevenue,
+        conversionRate,
+        salesOverTime,
+        clicksOverTime,
+        topProducts,
+        topPlatforms,
+        payout,
+      },
+    };
+  })
+
 });

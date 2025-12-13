@@ -78,11 +78,11 @@ function Creators({ campaignId }: { campaignId: number }) {
                     className="px-3 py-4 text-center cursor-pointer"
                     onClick={() =>
                       router.push(
-                        `/brand/campaigns/${campaignId}/c/${c.id}`
+                        `/brand/campaigns/${campaignId}/creator/${c.id}`
                       )
                     }
                   >
-                    <div className="inline-flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700">
+                    <div className="inline-flex items-center justify-center gap-2 text-blue-500 hover:text-gray-700">
                       <span>View Analytics</span>
                       <ArrowRight className="h-4 w-4" />
                     </div>

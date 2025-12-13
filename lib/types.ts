@@ -100,19 +100,33 @@ export type ProductStat = {
   revenue: number;
 };
 export type PlatformClicksStat = {
+  name: string;
   platform: string;
   clicks: number;
 };
 
 export type PlatformSalesStat = {
+  name: string;
   platform: string;
   sales: number;
 };
+export type TopCreators = {
+  revenue: CreatorStat[];
+  clicks: CreatorStat[];
+  sales: CreatorStat[];
+};
 
+export type TopProducts = {
+  revenue: ProductStat[];
+  sales: ProductStat[];
+};
 export type TopPlatforms = {
   clicks: PlatformClicksStat[];
   sales: PlatformSalesStat[];
 };
+export type CreatorMetric = "revenue" | "clicks" | "sales";
+export type ProductMetric = "revenue" | "sales";
+export type PlatformMetric = "clicks" | "sales";
 export type OverviewShape = {
   sales: number;
   clicks: number;
@@ -122,7 +136,7 @@ export type OverviewShape = {
   products: number;
   salesOverTime: SalesOverTimeItem[];
   clicksOverTime: ClicksOverTimeItem[];
-  topCreators: CreatorStat[];
-  topProducts: ProductStat[];
+  topCreators: TopCreators;
+  topProducts: TopProducts;
   topPlatforms: TopPlatforms;
 };
