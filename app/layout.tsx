@@ -6,6 +6,7 @@ import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalUserLoader } from "@/components/GlobalUserLoader";
 import FetchUser from "@/components/FetchUser";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="beforeInteractive"
+        />
         <QueryProvider>
           <FetchUser />
           <GlobalUserLoader />

@@ -20,19 +20,21 @@ model User {
 }
 
 model BrandProfile {
-  id           Int              @id @default(autoincrement())
-  userId       Int              @unique
-  user         User             @relation(fields: [userId], references: [id])
-  name         String
-  description  String?
-  industry     IndustryCategory @default(OTHER)
-  websiteUrl   String?
-  contactEmail String?
-  products     Product[]
-  campaigns    Campaign[]
-  apiKey       String?          @unique
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime?        @updatedAt
+  id                Int                @id @default(autoincrement())
+  userId            Int                @unique
+  user              User               @relation(fields: [userId], references: [id])
+  name              String
+  description       String?
+  industry          IndustryCategory   @default(OTHER)
+  websiteUrl        String?
+  contactEmail      String?
+  products          Product[]
+  campaigns         Campaign[]
+  apiKey            String?            @unique
+  subscription BrandSubscription?
+  paymentRecords    PaymentRecord[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime?          @updatedAt
 }
 
 model CreatorProfile {
@@ -168,6 +170,32 @@ model ClickEvent {
   @@unique([memberId, platform, date])
 }
 
+model BrandSubscription {
+  id Int @id @default(autoincrement())
+
+  brandId Int          @unique
+  brand   BrandProfile @relation(fields: [brandId], references: [id])
+
+  plan      Plan     @default(BRAND_GROWTH)
+  startedAt DateTime
+  expiresAt DateTime
+
+  @@index([brandId])
+}
+
+model PaymentRecord {
+  id Int @id @default(autoincrement())
+
+  brandId Int
+  brand   BrandProfile @relation(fields: [brandId], references: [id])
+
+  amount            Int
+  currency          Currency        @default(INR)
+  provider          PaymentProvider @default(RAZORPAY)
+  providerPaymentId String
+  paidAt            DateTime        @default(now())
+}
+
 enum UserRole {
   BRAND
   CREATOR
@@ -241,4 +269,12 @@ enum PayoutModel {
 enum CommissionType {
   PERCENTAGE
   FIXED
+}
+
+enum Plan {
+  BRAND_GROWTH
+}
+
+enum PaymentProvider {
+  RAZORPAY
 }

@@ -1,3 +1,4 @@
+import SubscribeButton from "@/components/SubscribeButton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -16,6 +17,8 @@ export default function Home() {
       <Link href={"/creator"}>
       <Button>Creator</Button>
       </Link>
+
+      <SubscribeButton />
     </div>
   );
 }
