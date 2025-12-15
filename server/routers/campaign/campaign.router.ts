@@ -9,13 +9,13 @@ import {
   startCampaignSchema,
   updateCampaignSchema,
 } from "@/server/utils/zod";
-import { router, brandProcedure, creatorProcedure } from "../../trpc";
+import { router, brandProcedure, creatorProcedure,brandWithSubscriptionProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { generateUniqueReferralCode, topNWithOther } from "@/lib/tools";
 import { z } from "zod";
 
 export const campaignRouter = router({
-  createCampaign: brandProcedure
+  createCampaign: brandWithSubscriptionProcedure
     .input(createCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -62,7 +62,7 @@ export const campaignRouter = router({
       }
     }),
 
-  updateCampaign: brandProcedure
+  updateCampaign: brandWithSubscriptionProcedure
     .input(updateCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -364,7 +364,7 @@ export const campaignRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
-  addProductInCampaign: brandProcedure
+  addProductInCampaign: brandWithSubscriptionProcedure
     .input(addProductInCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -526,7 +526,7 @@ export const campaignRouter = router({
       }
     }),
 
-  removeProductFromCampaign: brandProcedure
+  removeProductFromCampaign: brandWithSubscriptionProcedure
     .input(removeProductFromCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -586,7 +586,7 @@ export const campaignRouter = router({
       }
     }),
 
-  sendCampaignInvite: brandProcedure
+  sendCampaignInvite: brandWithSubscriptionProcedure
     .input(sendCampaignInviteSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -1126,7 +1126,7 @@ export const campaignRouter = router({
       }
     }),
 
-  startCampaign: brandProcedure
+  startCampaign: brandWithSubscriptionProcedure
     .input(startCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -1191,7 +1191,7 @@ export const campaignRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
-  completeCampaign: brandProcedure
+  completeCampaign: brandWithSubscriptionProcedure
     .input(completeCampaignSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;

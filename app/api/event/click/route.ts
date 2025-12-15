@@ -1,3 +1,4 @@
+import { checkBrandSubscription } from "@/lib/checkBrandSubscription";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -50,32 +51,35 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const subCheck = await checkBrandSubscription(member.campaign.brandId);
 
     // 3. Compute today's date (no time)
-    const now = new Date();
-    const dateOnly = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-    );
+    if (!subCheck) {
+      const now = new Date();
+      const dateOnly = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+      );
 
-    // 4. Upsert click counter
-    await prisma.clickEvent.upsert({
-      where: {
-        memberId_platform_date: {
+      // 4. Upsert click counter
+      await prisma.clickEvent.upsert({
+        where: {
+          memberId_platform_date: {
+            memberId: member.id,
+            platform: referralCode.platform,
+            date: dateOnly,
+          },
+        },
+        update: {
+          count: { increment: 1 },
+        },
+        create: {
           memberId: member.id,
           platform: referralCode.platform,
           date: dateOnly,
+          count: 1,
         },
-      },
-      update: {
-        count: { increment: 1 },
-      },
-      create: {
-        memberId: member.id,
-        platform: referralCode.platform,
-        date: dateOnly,
-        count: 1,
-      },
-    });
+      });
+    }
 
     // 5. Return redirect URL instantly
     return NextResponse.json(

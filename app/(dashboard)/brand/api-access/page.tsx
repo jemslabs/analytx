@@ -41,6 +41,9 @@ function BrandAPIAccess() {
 
       // Background refresh
     },
+    onError: (err) => {
+      toast.error(err.message || "Something went wrong");
+    }
   });
 
   const maskedKey = user?.brandProfile?.apiKey ? "•".repeat(28) : "";
@@ -159,7 +162,7 @@ function BrandAPIAccess() {
           <tbody className="bg-white divide-y divide-gray-200">
             <tr>
               <td className="px-6 py-4 text-sm text-gray-900">
-                https://tranzo.com/api/event/sale
+                https://analytx.shop/api/event/sale
               </td>
               <td className="px-6 py-4 text-sm text-gray-900">Sale Event</td>
             </tr>

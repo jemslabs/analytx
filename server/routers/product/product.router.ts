@@ -1,9 +1,13 @@
 import { createProductSchema, updateProductSchema } from "@/server/utils/zod";
-import { router, brandProcedure } from "../../trpc";
+import {
+  router,
+  brandProcedure,
+  brandWithSubscriptionProcedure,
+} from "../../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const productRouter = router({
-  createProduct: brandProcedure
+  createProduct: brandWithSubscriptionProcedure
     .input(createProductSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;
@@ -41,7 +45,7 @@ export const productRouter = router({
       }
     }),
 
-  updateProduct: brandProcedure
+  updateProduct: brandWithSubscriptionProcedure
     .input(updateProductSchema)
     .mutation(async ({ ctx, input }) => {
       const prisma = ctx.prisma;

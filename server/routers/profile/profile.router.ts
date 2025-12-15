@@ -4,7 +4,7 @@ import {
   updateBrandProfile,
   updateCreatorProfileSchema,
 } from "@/server/utils/zod";
-import { router, protectedProcedure, brandProcedure } from "../../trpc";
+import { router, protectedProcedure, brandProcedure, brandWithSubscriptionProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { generateApiKey, hashApiKey, topNWithOther } from "@/lib/tools";
 
@@ -190,7 +190,7 @@ export const profileRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
-  generateAPIKey: brandProcedure.mutation(async ({ ctx }) => {
+  generateAPIKey: brandWithSubscriptionProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.userId;
 
     try {

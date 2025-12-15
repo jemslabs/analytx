@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyBrandApiKey } from "@/lib/verifyBrandApiKey";
+import { checkBrandSubscription } from "@/lib/checkBrandSubscription";
 
 export async function POST(req: Request) {
   const brand = await verifyBrandApiKey(req);
@@ -54,6 +55,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const subCheck = await checkBrandSubscription(member.campaign.brandId);
+    if (subCheck) return subCheck;
     // 2. Validate Product belongs to brand
     const product = await prisma.product.findFirst({
       where: {

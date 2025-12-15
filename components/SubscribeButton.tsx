@@ -11,7 +11,11 @@ import { Info } from "lucide-react";
 type SubscriptionState = "NO_SUBSCRIPTION" | "EXPIRED" | "ACTIVE";
 
 export default function SubscribeButton() {
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
+
+
+
+
 
   const subscriptionState: SubscriptionState = useMemo(() => {
     const subscription = user?.brandProfile?.subscription;
@@ -54,6 +58,11 @@ export default function SubscribeButton() {
             result.data.success
               ? toast.success("Growth plan activated")
               : toast.error("Payment verification failed");
+
+            const res = await axios.get("/api/auth/user");
+            if (res.status === 200) {
+              setUser(res.data)
+            }
           } catch {
             toast.error("Verification failed");
           }
