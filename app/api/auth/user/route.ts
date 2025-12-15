@@ -13,8 +13,13 @@ export async function GET() {
         id: userId,
       },
       include: {
-        brandProfile: true,
+        brandProfile: {
+          include: {
+            subscription: true
+          }
+        },
         creatorProfile: true,
+        
       },
     });
 
@@ -30,6 +35,7 @@ export async function GET() {
         createdAt: user.createdAt,
         brandProfile: user.brandProfile,
         creatorProfile: user.creatorProfile,
+        
       },
       { status: 200 }
     );

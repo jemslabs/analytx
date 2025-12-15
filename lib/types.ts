@@ -30,6 +30,7 @@ export type brandProfileType = {
   contactEmail: string | null;
   apiKey: string;
   updatedAt: Date | null;
+  subscription: BrandSubscriptionType | null;
 };
 export type creatorProfileType = {
   id: number;
@@ -40,6 +41,13 @@ export type creatorProfileType = {
   bio: string | null;
   niche: CreatorNicheType;
 };
+export type BrandSubscriptionType = {
+  id: number;
+  brandId: number;
+  plan: "BRAND_GROWTH";
+  startedAt: Date;
+  expiresAt: Date;
+}
 export type useAuthStoreType = {
   user: userType | null;
   isUserLoading: boolean;

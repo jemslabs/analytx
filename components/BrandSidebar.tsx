@@ -18,6 +18,7 @@ import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import useAuthStore from "@/stores/useAuth";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import SubscribeButton from "./SubscribeButton";
 
 export default function BrandSidebar() {
   const router = useRouter();
@@ -101,9 +102,10 @@ export default function BrandSidebar() {
           <PanelLeftClose className="h-4 w-4 text-gray-700" />
         )}
       </button>
-
+      {!collapsed && 
+     <SubscribeButton /> }
       <div
-        className={cn(
+        className={cn(  
           "mt-auto",
           collapsed && "flex justify-center"
         )}
@@ -137,7 +139,7 @@ export default function BrandSidebar() {
 
 
 
-
+     
           <DropdownMenuContent
             side="right"
             align="start"
