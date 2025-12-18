@@ -149,7 +149,10 @@ export default function CreatorSidebar() {
 
             <DropdownMenuItem
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium  hover:bg-red-50 transition cursor-pointer"
-              onClick={() => logout(router)}
+              onClick={async () => {
+                await logout(router);
+              }}
+
             >
               <LogOut className="h-4 w-4" />
               Logout

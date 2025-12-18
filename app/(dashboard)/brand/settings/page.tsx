@@ -70,7 +70,7 @@ function BrandSettings() {
         // URL validation (basic)
         try {
             new URL(data.websiteUrl);
-        } catch (err) {
+        } catch {
             toast.error("Please enter a valid website URL.");
             return;
         }

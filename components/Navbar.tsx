@@ -8,11 +8,11 @@ import useAuthStore from "@/stores/useAuth";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Docs", href: "/docs" },
-   { label: "Pricing", href: "/#pricing" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 export default function Navbar() {
-  const { user } = useAuthStore();
+  const { user, isUserLoading } = useAuthStore();
   const dashboardHref = user?.role === "BRAND" ? "/brand" : "/creator";
 
   return (
@@ -47,28 +47,32 @@ export default function Navbar() {
 
             {/* Right */}
             <div className="flex items-center gap-2">
-              {user ? (
-                <Link href={dashboardHref}>
-                  <Button className="px-6 rounded-xl ">Dashboard</Button>
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <Button
-                      variant="secondary"
-                      className="px-5 rounded-xl hover:bg-white"
-                    >
-                      Login
-                    </Button>
-                  </Link>
 
-                  <Link href="/signup">
-                    <Button className="group px-6 rounded-xl shadow-sm inline-flex items-center justify-center gap-2">
-                      <span className="leading-none">Signup</span>
-                    </Button>
+              {!isUserLoading && (
+                user ? (
+                  <Link href={dashboardHref}>
+                    <Button className="px-6 rounded-xl ">Dashboard</Button>
                   </Link>
-                </>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button
+                        variant="secondary"
+                        className="px-5 rounded-xl hover:bg-white"
+                      >
+                        Login
+                      </Button>
+                    </Link>
+
+                    <Link href="/signup">
+                      <Button className="group px-6 rounded-xl shadow-sm inline-flex items-center justify-center gap-2">
+                        <span className="leading-none">Signup</span>
+                      </Button>
+                    </Link>
+                  </>
+                )
               )}
+
             </div>
           </div>
         </div>

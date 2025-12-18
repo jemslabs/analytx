@@ -102,10 +102,10 @@ export default function BrandSidebar() {
           <PanelLeftClose className="h-4 w-4 text-gray-700" />
         )}
       </button>
-      {!collapsed && 
-     <SubscribeButton /> }
+      {!collapsed &&
+        <SubscribeButton />}
       <div
-        className={cn(  
+        className={cn(
           "mt-auto",
           collapsed && "flex justify-center"
         )}
@@ -139,7 +139,7 @@ export default function BrandSidebar() {
 
 
 
-     
+
           <DropdownMenuContent
             side="right"
             align="start"
@@ -148,7 +148,10 @@ export default function BrandSidebar() {
 
             <DropdownMenuItem
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium  hover:bg-red-50 transition cursor-pointer"
-              onClick={() => logout(router)}
+              onClick={async () => {
+                await logout(router);
+              }}
+
             >
               <LogOut className="h-4 w-4" />
               Logout

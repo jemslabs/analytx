@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 
+
 export default function RedirectPage() {
   const { code }: { code: string } = useParams();
   const [loading, setLoading] = useState(true);
@@ -25,8 +26,15 @@ export default function RedirectPage() {
           setError("No redirect URL found");
           setLoading(false);
         }
-      } catch (err: any) {
-        setError(err.response?.data?.msg || "Something went wrong");
+      } catch (err) {
+        let msg = "Something went wrong";
+
+        // Type guard to check if it's an Axios error
+        if (axios.isAxiosError(err) && err.response?.data?.msg) {
+          msg = err.response.data.msg;
+        }
+
+        setError(msg);
         setLoading(false);
       }
     };

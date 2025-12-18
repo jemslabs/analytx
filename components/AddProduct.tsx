@@ -39,7 +39,7 @@ export default function AddProduct() {
         e.preventDefault();
         try {
             new URL(data.productUrl);
-        } catch (err) {
+        } catch {
             toast.error("Please enter a valid product URL.");
             return;
         }

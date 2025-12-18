@@ -8,14 +8,11 @@ const useAuthStore = create<useAuthStoreType>((set) => ({
   user: null,
   isUserLoading: true,
   logout: async (router) => {
+    set({ user: null, isUserLoading: false });
     try {
       const res = await axios.post("/api/auth/logout");
       if (res.status === 200) {
         queryClient.clear();
-        set({
-          user: null,
-          isUserLoading: false, // recommended
-        });
         toast.success(res.data.msg);
         router.push("/login");
       }
@@ -25,10 +22,9 @@ const useAuthStore = create<useAuthStoreType>((set) => ({
           error.response?.data?.msg ||
           "Something went wrong. Please try again.";
         toast.error(errorMsg);
-        return null;
       } else {
         toast.error("An unexpected error occurred.");
-        return null;
+        router.push("/login");
       }
     }
   },

@@ -26,7 +26,7 @@ export default function PricingSection() {
         "Unlimited campaigns",
         "Unlimited creators",
         "Unlimited tracking events",
-        "Real-time analytics dashboard",
+        "Detailed analytics dashboard",
         "Server-side tracking (no pixels)",
         "CPC & CPS commission models",
         "Automated payout calculations",
