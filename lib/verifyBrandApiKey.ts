@@ -3,6 +3,7 @@ import { hashApiKey } from "./tools";
 
 export async function verifyBrandApiKey(req: Request) {
   const auth = req.headers.get("authorization");
+    console.log(auth)
   const apiKey = auth?.replace("Bearer ", "");
   console.log(apiKey)
   if (!apiKey) return null;
