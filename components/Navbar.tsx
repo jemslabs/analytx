@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import useAuthStore from "@/stores/useAuth";
+import Image from "next/image";
 
 
 const navLinks = [
@@ -26,9 +27,9 @@ export default function Navbar() {
             <div className="flex items-center gap-12">
               {/* Logo */}
               <Link href="/" className="flex items-center gap-1">
-                <span className="text-lg font-semibold tracking-tight">
-                  Analyt<span className="font-bold text-primary">X</span>
-                </span>
+                <Image src={'/download.png'} width={80}
+                  height={80}
+                  alt="Logo" />
               </Link>
 
               {/* Navigation */}

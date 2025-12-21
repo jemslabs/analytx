@@ -180,7 +180,7 @@ export default function FeaturesSection() {
               </p>
 
               <div className="rounded-lg border p-3 text-xs text-muted-foreground">
-                analytx.shop/r/creator123
+                tryanalytx.com/r/creator123
               </div>
             </div>
           </div>

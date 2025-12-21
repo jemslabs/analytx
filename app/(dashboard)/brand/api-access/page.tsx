@@ -162,7 +162,7 @@ function BrandAPIAccess() {
           <tbody className="bg-white divide-y divide-gray-200">
             <tr>
               <td className="px-6 py-4 text-sm text-gray-900">
-                https://analytx.shop/api/event/sale
+                https://tryanalytx.com/api/event/sale
               </td>
               <td className="px-6 py-4 text-sm text-gray-900">Sale Event</td>
             </tr>

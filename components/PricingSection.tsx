@@ -12,7 +12,7 @@ export default function PricingSection() {
       features: [
         "Join campaigns",
         "Generate unlimited referral links",
-        "Track clicks",
+        "Track clicks and sales",
         "View basic analytics",
       ],
       isPopular: false,

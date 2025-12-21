@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -8,7 +9,9 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
         {/* Branding */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">AnalytX</h2>
+          <Image src={'/download.png'} width={100}
+            height={100}
+            alt="Logo" />
           <p className="text-sm text-muted-foreground max-w-md">
             AnalytX helps brands see what truly drives results in creator marketing — with accurate attribution, actionable analytics, and reliable data at scale.
           </p>

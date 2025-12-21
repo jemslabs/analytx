@@ -49,7 +49,7 @@ export default function BrandDocsPage() {
           To record a sale, your backend should send a <code>POST</code> request to the Sale Event API endpoint:
         </p>
         <pre className="bg-black text-white rounded-md p-4 text-sm overflow-x-auto">
-          {`POST https://analytx.shop/api/event/sale`}
+          {`POST https://tryanalytx.com/api/event/sale`}
         </pre>
 
         <p className="text-muted-foreground mb-2">
@@ -71,17 +71,17 @@ export default function BrandDocsPage() {
           Example request:
         </p>
         <pre className="bg-black text-white rounded-md p-4 text-sm overflow-x-auto">
-          {`POST https://analytx.shop/api/event/sale
-Headers:
-  Authorization: Bearer YOUR_API_KEY_HERE
-  Content-Type: application/json
+          {`POST https://tryanalytx.com/api/event/sale
+            Headers:
+              Authorization: Bearer YOUR_API_KEY_HERE
+              Content-Type: application/json
 
-Body:
-{
-  "referralCode": "CREATOR123",
-  "skuId": "SKU-001",
-  "salePrice": 499
-}`}
+            Body:
+            {
+              "referralCode": "CREATOR123",
+              "skuId": "SKU-001",
+              "salePrice": 499
+            }`}
         </pre>
 
         <p className="text-muted-foreground">
