@@ -4,8 +4,6 @@ import { hashApiKey } from "./tools";
 export async function verifyBrandApiKey(req: Request) {
   const apiKey = req.headers.get("x-analytx-api-key");
 
-  console.log("API KEY HEADER:", apiKey);
-
   if (!apiKey) return null;
 
   const hashed = hashApiKey(apiKey);
