@@ -44,11 +44,11 @@ export default function PricingSection() {
         {/* Header */}
         <div className="text-center mb-20">
           <span className="bg-white inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium">
-            Simple Pricing
+            Pricing
           </span>
 
           <h2 className="mt-6 text-4xl md:text-5xl font-semibold tracking-tight">
-            One plan, everything included
+            Simple, Transparent Pricing
           </h2>
 
           <p className="mt-4 text-lg text-muted-foreground">

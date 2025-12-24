@@ -1,24 +1,28 @@
 import { getToken } from "@/lib/generateToken";
 import { prisma } from "@/lib/prisma";
 import { razorpay } from "@/lib/razorpay";
+import { applyCoupon } from "@/lib/tools";
 import { NextResponse } from "next/server";
 
-const PLAN_AMOUNT = 9999;
-export async function POST() {
-  const userId = await getToken();
+const PLAN_AMOUNT = 9999; // INR
+
+export async function POST(req: Request) {
   try {
+    const userId = await getToken();
     if (!userId) {
-      return NextResponse.json({ msg: "Unauthorized" }, { status: 400 });
+      return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
     }
+
+    const { couponCode } = await req.json();
+
     const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
+      where: { id: userId },
     });
 
     if (!user) {
       return NextResponse.json({ msg: "User not found" }, { status: 404 });
     }
+
     if (user.role !== "BRAND") {
       return NextResponse.json(
         { msg: "Only brand can purchase growth plan" },
@@ -27,9 +31,7 @@ export async function POST() {
     }
 
     const brand = await prisma.brandProfile.findUnique({
-      where: {
-        userId,
-      },
+      where: { userId },
     });
 
     if (!brand) {
@@ -38,6 +40,7 @@ export async function POST() {
         { status: 404 }
       );
     }
+
     const existingSub = await prisma.brandSubscription.findUnique({
       where: { brandId: brand.id },
     });
@@ -49,22 +52,40 @@ export async function POST() {
       );
     }
 
+    let pricing;
+    try {
+      pricing = applyCoupon(PLAN_AMOUNT, couponCode);
+    } catch (err: any) {
+      // ✅ Return proper error message for invalid or expired coupon
+      return NextResponse.json({ msg: err.message }, { status: 400 });
+    }
+
     const order = await razorpay.orders.create({
-      amount: PLAN_AMOUNT * 100,
+      amount: pricing.finalAmount * 100, // paise
       currency: "INR",
       receipt: `receipt_${brand.id}_${Date.now()}`,
       notes: {
         brandId: String(brand.id),
         plan: "BRAND_GROWTH",
-      }
+        originalAmount: PLAN_AMOUNT,
+        finalAmount: pricing.finalAmount,
+        discountPercent: pricing.discountPercent ?? 0,
+        couponCode: pricing.applied ? couponCode : "NONE",
+      },
     });
+
+
 
     return NextResponse.json({
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
+      finalAmount: pricing.finalAmount
     });
   } catch {
-    return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { msg: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

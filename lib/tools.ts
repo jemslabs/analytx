@@ -41,3 +41,33 @@ export function topNWithOther<T extends Record<string, any>>(
     },
   ];
 }
+export function applyCoupon(
+  baseAmount: number,
+  couponCode?: string
+) {
+  if (!couponCode) {
+    return { finalAmount: baseAmount, applied: false };
+  }
+
+  const normalized = couponCode.toUpperCase();
+
+  // FESTIVAL COUPON
+  if (normalized === "NEWYEAR30") {
+    const expiry = new Date("2026-01-07T23:59:59");
+
+    if (new Date() > expiry) {
+      throw new Error("Coupon expired");
+    }
+
+    const discount = Math.floor(baseAmount * 0.3);
+
+    return {
+      finalAmount: baseAmount - discount,
+      applied: true,
+      discountPercent: 30,
+      coupon: "NEWYEAR30",
+    };
+  }
+
+  throw new Error("Invalid coupon code");
+}

@@ -1,10 +1,11 @@
-import Link from "next/link"
-import { Button } from "./ui/button"
+import Link from "next/link";
+import { Button } from "./ui/button";
+import HeroNotification from "./HeroNotification";
 
 function HeroSection() {
     return (
         <section className="relative overflow-hidden">
-
+            <HeroNotification />
 
             <div className="relative mx-auto max-w-7xl px-6 pt-40 pb-32 text-center">
                 <div className="mb-8 flex justify-center">
@@ -18,7 +19,6 @@ function HeroSection() {
                             Jems Labs
                         </Link>
                     </span>
-
                 </div>
 
                 <h1 className="text-4xl md:text-6xl font-medium tracking-tight leading-tight text-gray-900 dark:text-black">
@@ -51,9 +51,9 @@ function HeroSection() {
                         </Button>
                     </Link>
                 </div>
+
                 <div className="relative mx-auto mt-20 max-w-5xl">
                     <div className="rounded-2xl border bg-background shadow-xl">
-
                         <div className="flex items-center gap-2 border-b px-4 py-3">
                             <span className="h-3 w-3 rounded-full bg-red-400" />
                             <span className="h-3 w-3 rounded-full bg-yellow-400" />
@@ -90,7 +90,7 @@ function HeroSection() {
                 </div>
             </div>
         </section>
-    )
+    );
 }
 
-export default HeroSection
+export default HeroSection;

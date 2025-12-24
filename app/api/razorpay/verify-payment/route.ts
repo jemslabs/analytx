@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getToken } from "@/lib/generateToken";
 
-const PLAN_AMOUNT = 9999;
+// const PLAN_AMOUNT = 9999;
 const PLAN_DURATION_DAYS = 30;
 
 export async function POST(req: Request) {
@@ -13,10 +13,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
     }
 
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
-      await req.json();
+    const {
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+      amount,
+    } = await req.json();
 
-    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    if (
+      !razorpay_payment_id ||
+      !razorpay_order_id ||
+      !razorpay_signature ||
+      !amount
+    ) {
       return NextResponse.json(
         { msg: "Invalid payment data" },
         { status: 400 }
@@ -67,7 +76,7 @@ export async function POST(req: Request) {
     await prisma.paymentRecord.create({
       data: {
         brandId: brand.id,
-        amount: PLAN_AMOUNT,
+        amount: Number(amount),
         providerPaymentId: razorpay_payment_id,
       },
     });
