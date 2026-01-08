@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import HeroNotification from "./HeroNotification";
+// import HeroNotification from "./HeroNotification";
 
 function HeroSection() {
     return (
         <section className="relative overflow-hidden">
-            <HeroNotification />
+            {/* <HeroNotification /> */}
 
             <div className="relative mx-auto max-w-7xl px-6 pt-40 pb-32 text-center">
                 <div className="mb-8 flex justify-center">
