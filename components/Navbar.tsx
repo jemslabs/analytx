@@ -75,7 +75,7 @@ export default function Navbar() {
 
                     <Link href="/signup">
                       <Button className="rounded-lg px-5 shadow-sm">
-                        Get Started
+                        Signup
                       </Button>
                     </Link>
                   </>
@@ -131,7 +131,7 @@ export default function Navbar() {
 
                           <Link href="/signup">
                             <Button className="w-full rounded-lg">
-                              Get Started
+                              Signup
                             </Button>
                           </Link>
                         </div>

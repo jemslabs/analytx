@@ -11,7 +11,7 @@ import {
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="lg:py-32">
+    <section id="features" className="lg:py-32 py-15">
       <div className="mx-auto max-w-7xl px-6">
         {/* Header */}
         <div className="text-center mb-20">

@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 function HeroSection() {
     return (
-        <section className="relative overflow-hidden">
+        <section className="relative overflow-hidden my-5">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-20 sm:pt-28 md:pt-36 pb-16 sm:pb-24 text-center">
 
                 {/* Badge */}
@@ -29,9 +29,8 @@ function HeroSection() {
                 </h1>
 
                 {/* Description – original content */}
-                <p className="mx-auto mt-4 max-w-xl text-sm sm:text-base md:text-lg text-muted-foreground">
-                    AnalytX tracks real clicks and sales from creator campaigns
-                    using performance-based attribution.
+                <p className="mx-auto mt-4 max-w-[650px] text-sm sm:text-base md:text-lg text-muted-foreground">
+                    AnalytX tracks real clicks and sales across creator campaigns, showing which creators drive results and defining payouts based on performance.
                 </p>
 
                 {/* Actions – unchanged */}
@@ -58,15 +57,17 @@ function HeroSection() {
 
                 {/* Soft CTA – original content */}
                 <p className="mt-6 text-xs sm:text-sm text-muted-foreground">
-                    Want to test it first?{" "}
+                    Want to test it first?
+                    <span className="block sm:inline"> </span>
                     <Link
                         href="https://calendly.com/isonikrish/intro-call"
-                        className="font-semibold text-primary underline"
+                        className="block sm:inline font-semibold text-primary underline"
                         target="_blank"
                     >
                         Try a free campaign for 15 days
                     </Link>
                 </p>
+
 
                 {/* Dashboard Preview – same structure, mobile-safe */}
                 <div className="mx-auto mt-10 sm:mt-16 max-w-4xl">

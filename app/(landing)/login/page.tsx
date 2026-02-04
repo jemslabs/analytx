@@ -64,7 +64,7 @@ export default function LoginPage() {
 
           {/* Subtext */}
           <p className="mt-4 text-zinc-300 max-w-md">
-            AnalytX tracks real clicks and sales from creator campaigns using performance-based attribution.
+            AnalytX tracks real clicks and sales across creator campaigns, showing which creators drive results and defining payouts based on performance.
           </p>
         </div>
       </div>

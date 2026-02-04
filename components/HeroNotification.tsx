@@ -4,7 +4,7 @@ function HeroNotification() {
   return (
     <div className="absolute top-0 left-0 w-full bg-accent-foreground text-white text-center py-2 font-medium z-50 flex flex-col md:flex-row justify-center items-center gap-4">
       <span>
-        🎯 Track your next influencer campaign <strong>free for 15 days</strong>
+        🎯 Track your next creator campaign <strong>free for 15 days</strong>
       </span>
       <a
         href="/book-intro-call"
