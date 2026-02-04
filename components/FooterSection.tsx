@@ -13,7 +13,7 @@ export default function Footer() {
             height={100}
             alt="Logo" />
           <p className="text-sm text-muted-foreground max-w-md">
-            AnalytX helps brands see what truly drives results in creator marketing — with accurate attribution, actionable analytics, and reliable data at scale.
+            AnalytX tracks real clicks and sales from creator campaigns using performance-based attribution.
           </p>
         </div>
 

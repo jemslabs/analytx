@@ -56,10 +56,6 @@ export default function LoginPage() {
                       />
                     </div>
 
-          {/* Badge */}
-          <div className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-sm mb-6">
-            Track Campaign Performance
-          </div>
 
           {/* Headline */}
           <h1 className="text-4xl font-semibold leading-tight">
@@ -68,7 +64,7 @@ export default function LoginPage() {
 
           {/* Subtext */}
           <p className="mt-4 text-zinc-300 max-w-md">
-            AnalytX helps brands see what truly drives results in creator marketing — with accurate attribution, actionable analytics, and reliable data at scale.
+            AnalytX tracks real clicks and sales from creator campaigns using performance-based attribution.
           </p>
         </div>
       </div>
