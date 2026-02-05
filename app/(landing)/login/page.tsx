@@ -59,7 +59,7 @@ export default function LoginPage() {
 
           {/* Headline */}
           <h1 className="text-4xl font-semibold leading-tight">
-            Welcome back to Analytx
+            Welcome back to AnalytX
           </h1>
 
           {/* Subtext */}

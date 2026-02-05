@@ -23,7 +23,7 @@ const navLinks = [
 
 export default function Navbar() {
   const { user, isUserLoading } = useAuthStore();
-  const dashboardHref = user?.role === "BRAND" ? "/brand" : "/creator";
+  const dashboardHref = user?.role === "ADMIN" ? "/admin" : user?.role === "BRAND" ? "/brand" : "/creator";
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-muted border-b border-gray-200">

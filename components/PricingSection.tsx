@@ -8,7 +8,8 @@ export default function PricingSection() {
     {
       name: "Creator Plan",
       price: "Free",
-      description: "Perfect for creators to join campaigns and generate referral links.",
+      description:
+        "Perfect for creators to join campaigns and generate referral links.",
       features: [
         "Join campaigns",
         "Generate unlimited referral links",
@@ -21,7 +22,8 @@ export default function PricingSection() {
     {
       name: "Brand Growth Plan",
       price: "₹9,999 / month",
-      description: "Everything you need to track, analyze, and scale your creator marketing.",
+      description:
+        "Everything you need to track, analyze, and scale your creator marketing.",
       features: [
         "Unlimited campaigns",
         "Unlimited creators",
@@ -35,6 +37,7 @@ export default function PricingSection() {
       ],
       isPopular: true,
       href: "/signup",
+      hasFreeTrial: true,
     },
   ];
 
@@ -57,13 +60,13 @@ export default function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 justify-center items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {plans.map((plan, idx) => (
             <div
               key={idx}
-              className={`relative rounded-3xl bg-white p-10 overflow-hidden shadow-lg hover:shadow-xl transition-all flex flex-col justify-between ${
+              className={`relative rounded-3xl bg-white p-10 shadow-lg flex flex-col justify-between ${
                 plan.isPopular
-                  ? "border-2 border-primary scale-105 md:scale-110"
+                  ? "border-2 border-primary scale-105"
                   : "border border-gray-200"
               }`}
             >
@@ -73,18 +76,18 @@ export default function PricingSection() {
                 </span>
               )}
 
-              <div className="relative z-10 space-y-6 flex-1">
+              <div className="space-y-6">
                 <h3 className="text-2xl font-bold">{plan.name}</h3>
 
-                <div className="text-3xl md:text-4xl font-extrabold">
-                  {plan.price}
-                </div>
+                <div className="text-4xl font-extrabold">{plan.price}</div>
 
-                <p className="text-sm text-muted-foreground">{plan.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
 
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-2">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2">
                       <span className="text-primary font-bold">✓</span>
                       {feature}
                     </li>
@@ -92,11 +95,26 @@ export default function PricingSection() {
                 </ul>
               </div>
 
-              <Link href={plan.href}>
-                <Button className="w-full mt-6">
-                  {plan.price === "Free" ? "Join Free" : "Get Started"}
-                </Button>
-              </Link>
+              <div className="mt-8">
+                <Link href={plan.href}>
+                  <Button className="w-full">
+                    {plan.price === "Free" ? "Join Free" : "Get Started"}
+                  </Button>
+                </Link>
+
+                {plan.hasFreeTrial && (
+                  <p className="mt-4 text-xs sm:text-sm text-muted-foreground text-center">
+                    Want to test it first?{" "}
+                    <Link
+                      href="https://calendly.com/isonikrish/intro-call"
+                      target="_blank"
+                      className="font-semibold text-primary underline underline-offset-4"
+                    >
+                      Start a 14-day free trial
+                    </Link>
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>

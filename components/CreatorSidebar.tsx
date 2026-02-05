@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  LayoutDashboard,
   PanelLeftOpen,
   PanelLeftClose,
   ChevronsUpDown,

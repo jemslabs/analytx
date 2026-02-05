@@ -68,6 +68,12 @@ const useAuthStore = create<useAuthStoreType>((set) => ({
         const user = res.data;
         set({ user, isUserLoading: false });
         // redirect logic
+        // ADMIN: always go to /admin
+        if (user.role === "ADMIN") {
+          router.replace("/admin");
+          return;
+        }
+
         if (user.role === "BRAND" && !user.brandProfile) {
           router.replace("/onboarding/brand");
           return;

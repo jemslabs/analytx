@@ -64,7 +64,7 @@ function HeroSection() {
                         className="block sm:inline font-semibold text-primary underline"
                         target="_blank"
                     >
-                        Try a free campaign for 15 days
+                        Try a free trial for 14 days
                     </Link>
                 </p>
 

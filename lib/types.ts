@@ -14,7 +14,7 @@ export type loginType = {
 export type userType = {
   id: number;
   email: string;
-  role: "BRAND" | "CREATOR";
+  role: "BRAND" | "CREATOR" | "ADMIN";
   createdAt: Date;
   brandProfile: brandProfileType | null;
   creatorProfile: creatorProfileType | null;
