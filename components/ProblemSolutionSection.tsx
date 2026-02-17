@@ -19,13 +19,13 @@ const ProblemSolutionSection = () => {
       icon: Target,
       title: "Unclear attribution",
       description:
-        "Brands can’t confidently say which creator or campaign actually drove conversions.",
+        "Brands can’t confidently say which influencer actually drove sales.",
     },
     {
       icon: DollarSign,
       title: "Manual tracking & payouts",
       description:
-        "Teams waste hours calculating commissions, validating sales, and managing payouts.",
+        "Teams waste hours validating sales, calculating commissions, and managing payouts manually.",
     },
   ];
 
@@ -34,19 +34,19 @@ const ProblemSolutionSection = () => {
       icon: LayoutDashboard,
       title: "Single source of truth",
       description:
-        "All campaign, click, and conversion data unified in one real-time dashboard.",
+        "All campaign, click, and conversion data unified in one dashboard.",
     },
     {
       icon: TrendingUp,
       title: "Reliable performance tracking",
       description:
-        "Server-side attribution connects every click to real conversions with accuracy.",
+        "Server-side attribution connects every click to verified sales with precision.",
     },
     {
       icon: Users,
       title: "Automatic tracking & payouts",
       description:
-        "Sales and clicks are verified, commissions are calculated automatically."
+        "Sales and clicks are verified, payouts are calculated automatically."
 
 
     },
@@ -62,10 +62,10 @@ const ProblemSolutionSection = () => {
             Problem / Solution
           </span>
           <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight text-foreground">
-            Why brands struggle with creator campaigns
+            Why brands struggle with influencer campaigns
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Running creator campaigns is easy. Tracking what actually works is not.
+            Running influencer campaigns is easy. Tracking what actually works is not.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ const ProblemSolutionSection = () => {
                 The Problem
               </span>
               <h3 className="mt-4 text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-                Where creator campaigns break down
+                Where influencer campaigns break down
               </h3>
             </div>
 
@@ -112,7 +112,7 @@ const ProblemSolutionSection = () => {
                 The Solution
               </span>
               <h3 className="mt-4 text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-                How AnalytX fixes it
+                How AnalytX solves it
               </h3>
             </div>
 

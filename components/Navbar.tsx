@@ -73,9 +73,9 @@ export default function Navbar() {
                       </Button>
                     </Link>
 
-                    <Link href="/signup">
-                      <Button className="rounded-lg px-5 shadow-sm">
-                        Signup
+                    <Link href="https://calendly.com/isonikrish/intro-call" target="_blank">
+                      <Button className="rounded-4xl px-5 shadow-sm">
+                        Start Trial
                       </Button>
                     </Link>
                   </>

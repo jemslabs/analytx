@@ -23,7 +23,7 @@ export default function PricingSection() {
       name: "Brand Growth Plan",
       price: "₹9,999 / month",
       description:
-        "Everything you need to track, analyze, and scale your creator marketing.",
+        "Everything you need to track, analyze, and scale your influencer marketing.",
       features: [
         "Unlimited campaigns",
         "Unlimited creators",

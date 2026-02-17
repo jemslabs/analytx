@@ -43,7 +43,7 @@ export default function HowItWorksSection() {
 
           <h2 className="mt-6 text-4xl md:text-5xl font-semibold tracking-tight">
             Get started with
-            <span className="text-primary"> creator marketing</span>
+            <span className="text-primary"> influencer marketing</span>
           </h2>
 
           <p className="mt-4 text-lg text-muted-foreground">

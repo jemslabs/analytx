@@ -13,7 +13,7 @@ export default function Footer() {
             height={100}
             alt="Logo" />
           <p className="text-sm text-muted-foreground max-w-md">
-            AnalytX tracks real clicks and sales across creator campaigns, showing which creators drive results and defining payouts based on performance.
+            AnalytX tracks clicks and sales across every influencer campaign, showing which influencers drive results and calculating payouts based on performance.
           </p>
         </div>
 

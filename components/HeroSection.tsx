@@ -22,7 +22,7 @@ function HeroSection() {
 
                 {/* Heading – original content */}
                 <h1 className="mx-auto max-w-3xl text-3xl sm:text-4xl md:text-7xl font-semibold tracking-tight leading-tight text-gray-900">
-                    Track which creators{" "}
+                    Track which influencers{" "}
                     <span className="text-primary font-extrabold">
                         actually drive sales
                     </span>
@@ -30,47 +30,36 @@ function HeroSection() {
 
                 {/* Description – original content */}
                 <p className="mx-auto mt-4 max-w-[650px] text-sm sm:text-base md:text-lg text-muted-foreground">
-                    AnalytX tracks real clicks and sales across creator campaigns, showing which creators drive results and defining payouts based on performance.
+                    AnalytX tracks clicks and sales across every influencer campaign, showing which influencers drive results and calculating payouts based on performance.
                 </p>
 
                 {/* Actions – unchanged */}
-                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center gap-3">
-                    <Link href="/signup" className="w-full sm:w-auto">
-                        <Button
-                            size="lg"
-                            className="w-full sm:w-auto rounded-xl px-8 shadow-md"
-                        >
-                            Get Started
-                        </Button>
-                    </Link>
+                <div className="mt-6 sm:mt-8 flex flex-col items-center gap-3">
 
-                    <Link href="/docs" className="w-full sm:w-auto">
-                        <Button
-                            size="lg"
-                            variant="secondary"
-                            className="w-full sm:w-auto rounded-xl px-8"
-                        >
-                            Read Docs
-                        </Button>
-                    </Link>
-                </div>
-
-                {/* Soft CTA – original content */}
-                <p className="mt-6 text-xs sm:text-sm text-muted-foreground">
-                    Want to test it first?
-                    <span className="block sm:inline"> </span>
                     <Link
                         href="https://calendly.com/isonikrish/intro-call"
-                        className="block sm:inline font-semibold text-primary underline"
+                        className="w-full sm:w-auto"
                         target="_blank"
                     >
-                        Try a free trial for 14 days
+                        <Button
+                            size="lg"
+                            className="w-full sm:w-auto rounded-4xl px-10 py-6 text-lg font-semibold shadow-lg"
+                        >
+                            Start Trial
+                        </Button>
                     </Link>
-                </p>
+
+                    <p className="text-sm text-muted-foreground text-center">
+                        14-day free trial for new brands & agencies. Intro call required.
+                    </p>
+
+                </div>
+
+
 
 
                 {/* Dashboard Preview – same structure, mobile-safe */}
-                <div className="mx-auto mt-10 sm:mt-16 max-w-4xl">
+                <div className="mx-auto mt-10 sm:mt-10 max-w-4xl">
                     <div className="rounded-xl border bg-background shadow-lg overflow-hidden">
 
                         <div className="flex items-center gap-2 border-b px-3 py-2">

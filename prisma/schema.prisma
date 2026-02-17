@@ -176,10 +176,10 @@ model BrandSubscription {
   brandId Int          @unique
   brand   BrandProfile @relation(fields: [brandId], references: [id])
 
-  plan           Plan     @default(BRAND_GROWTH)
-  startedAt      DateTime
-  expiresAt      DateTime
-  usedFreeTrial Boolean @default(false)
+  plan          Plan     @default(BRAND_GROWTH)
+  startedAt     DateTime
+  expiresAt     DateTime
+  usedFreeTrial Boolean  @default(false)
 
   @@index([brandId])
 }

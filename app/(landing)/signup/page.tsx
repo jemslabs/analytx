@@ -86,13 +86,13 @@ export default function SignupPage() {
 
           {/* Headline */}
           <h1 className="text-4xl font-semibold leading-tight">
-            Track which creators <br />
+            Track which influencers <br />
             actually drive sales
           </h1>
 
           {/* Subtext */}
           <p className="mt-4 text-zinc-300 max-w-md">
-            AnalytX tracks real clicks and sales across creator campaigns, showing which creators drive results and defining payouts based on performance.
+            AnalytX tracks clicks and sales across every influencer campaign, showing which influencers drive results and calculating payouts based on performance.
           </p>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function SignupPage() {
             </Button>
 
             <p className=" text-center text-muted-foreground">
-              Already using Analytx?{" "}
+              Already using AnalytX?{" "}
               <Link href="/login" className="font-medium underline">
                 Log in
               </Link>

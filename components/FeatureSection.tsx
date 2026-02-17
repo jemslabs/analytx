@@ -25,8 +25,7 @@ export default function FeaturesSection() {
           </h2>
 
           <p className="mt-4 text-lg text-muted-foreground">
-            Everything you need to measure campaign performance, creator impact,
-            and revenue — without guesswork.
+            Everything you need to measure influencer performance, sales impact, and ROI — without guesswork.
           </p>
         </div>
 

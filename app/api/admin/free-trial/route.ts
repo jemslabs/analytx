@@ -21,13 +21,19 @@ export async function POST(req: Request) {
       where: {
         id: userId,
       },
+      select: {
+        role: true
+      }
     });
 
     if (!user) {
       return NextResponse.json({ msg: "User not found" }, { status: 404 });
     }
     if (user.role !== "ADMIN") {
-      return NextResponse.json({ msg: "UNAUTHORIZED" }, { status: 400 });
+      return NextResponse.json({ msg: "UNAUTHORIZED" }, { status: 403 });
+    }
+    if(validatedReq.data.brandId <= 0){
+      return NextResponse.json({msg: "Invalid Data"}, {status: 400})
     }
 
     const brand = await prisma.brandProfile.findUnique({

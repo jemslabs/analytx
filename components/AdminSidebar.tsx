@@ -9,7 +9,8 @@ import {
     LogOut,
     PanelLeftClose,
     PanelLeftOpen,
-    Send
+    Send,
+    ListOrdered
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 function AdminSidebar() {
@@ -19,6 +20,7 @@ function AdminSidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const navItems = [
         { label: "Free Trial", icon: Send, href: `/admin` },
+        { label: "Brands", icon: ListOrdered, href: `/admin/brands` }
     ];
     return (
         <aside
@@ -37,6 +39,10 @@ function AdminSidebar() {
                     if (item.href === "/admin") {
                         active =
                             pathname === "/admin";
+                    }
+                    if (item.href === "/admin/brands"){
+                        active =
+                            pathname === "/admin/brands";
                     }
                     return (
                         <button
