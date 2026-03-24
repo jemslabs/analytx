@@ -29,7 +29,7 @@ export default function BrandSidebar() {
     { label: "Overview", icon: LayoutDashboard, href: `/brand` },
     { label: "Campaigns", icon: Megaphone, href: `/brand/campaigns` },
     { label: "Products", icon: ShoppingBag, href: `/brand/products` },
-    { label: "API Access", icon: Key, href: `/brand/api-access` },
+    { label: "Tracking Setup", icon: Key, href: `/brand/tracking-setup` },
     { label: "Settings", icon: Settings, href: `/brand/settings` },
   ];
 

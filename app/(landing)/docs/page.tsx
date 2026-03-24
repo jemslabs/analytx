@@ -7,7 +7,7 @@ export default function BrandDocsPage() {
       <div className="mb-12 text-left">
         <h1 className="text-4xl font-bold mb-2">Brand Integration Docs</h1>
         <p className="text-lg text-muted-foreground">
-          Track sales accurately by sending sale events to Analytx after creating campaigns and assigning products.
+          Track real sales from creators using Analytx with a simple script integration.
         </p>
       </div>
 
@@ -15,110 +15,127 @@ export default function BrandDocsPage() {
       <div className="mb-10">
         <h2 className="text-2xl font-semibold mb-4">Overview</h2>
         <p className="text-muted-foreground mb-2">
-          Analytx allows brands to track sales from creators and campaigns. To ensure accurate tracking and security, sale events must be sent from your <strong>backend</strong>, never directly from the frontend.
+          Analytx helps you track which creators actually drive revenue. You do not need complex backend integrations.
         </p>
         <p className="text-muted-foreground mb-2">
-          Each creator receives a referral link with a referral code, for example:
+          Creators share referral links like:
         </p>
         <pre className="bg-black text-white rounded-md p-4 text-sm overflow-x-auto">
-{`https://yourbrand.com/product-page?ref=CREATOR123`}
+{`https://yourbrand.com/product?ref=CREATOR123`}
         </pre>
-        <p className="text-muted-foreground mb-2">
-          Your backend should capture the <strong>referralCode</strong> and send verified sale events to Analytx securely.
+        <p className="text-muted-foreground">
+          Analytx automatically captures this referral and attributes the sale when a purchase is completed.
         </p>
       </div>
 
-      {/* Authorization */}
+      {/* Step 1 */}
       <div className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Authentication</h2>
+        <h2 className="text-2xl font-semibold mb-4">Step 1: Add Tracking Script</h2>
         <p className="text-muted-foreground mb-2">
-          Analytx uses a <strong>custom API key header</strong> for authentication.
+          Add the Analytx script to your website (preferably in the global layout or <code>{"<head>"}</code> section):
         </p>
-        <p className="text-muted-foreground mb-2">
-          Include your API key using the following request header:
-        </p>
+
         <pre className="bg-black text-white rounded-md p-4 text-sm overflow-x-auto">
-{`x-analytx-api-key: YOUR_API_KEY_HERE`}
+{`<script src="https://tryanalytx.com/tracker.js" 
+        data-api-key="YOUR_API_KEY">
+</script>`}
         </pre>
+
         <p className="text-muted-foreground mt-2">
-          Replace <code>YOUR_API_KEY_HERE</code> with the API key generated in your brand dashboard.
-        </p>
-        <p className="text-muted-foreground mt-2">
-          <strong>Do not use the Authorization header.</strong> Requests using <code>Authorization</code> will be rejected.
+          Replace <code>YOUR_API_KEY</code> with your API key from the dashboard.
         </p>
       </div>
 
-      {/* Sending a Sale Event */}
+      {/* Step 2 */}
       <div className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Sending a Sale Event</h2>
+        <h2 className="text-2xl font-semibold mb-4">Step 2: Track Sale</h2>
         <p className="text-muted-foreground mb-2">
-          To record a sale, your backend must send a <code>POST</code> request to:
+          Call <code>Analytx.trackSale()</code> only after a successful purchase (on your order confirmation / thank-you page).
         </p>
+
         <pre className="bg-black text-white rounded-md p-4 text-sm overflow-x-auto">
-{`POST https://tryanalytx.com/api/event/sale`}
+{`<script>
+Analytx.trackSale({
+  skuId: "SKU-001",
+  salePrice: 499
+});
+</script>`}
         </pre>
 
-        <p className="text-muted-foreground mb-2">
-          Required request body fields:
+        <p className="text-muted-foreground mt-2">
+          Required fields:
         </p>
-        <ul className="list-disc ml-6 text-muted-foreground mb-4">
+        <ul className="list-disc ml-6 text-muted-foreground">
+          <li><strong>skuId</strong> – Product SKU</li>
+          <li><strong>salePrice</strong> – Final amount paid</li>
+        </ul>
+      </div>
+
+      {/* How It Works */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-semibold mb-4">How It Works</h2>
+
+        <p className="text-muted-foreground mb-2">
+          1. Creator shares referral link
+        </p>
+        <p className="text-muted-foreground mb-2">
+          2. User visits your site → Analytx stores the referral automatically
+        </p>
+        <p className="text-muted-foreground mb-2">
+          3. User completes purchase
+        </p>
+        <p className="text-muted-foreground mb-2">
+          4. You call <code>Analytx.trackSale()</code>
+        </p>
+        <p className="text-muted-foreground mb-2">
+          5. Analytx attributes the sale to the correct creator and campaign
+        </p>
+      </div>
+
+      {/* Important Rules */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-semibold mb-4">Important Rules</h2>
+        <ul className="list-disc ml-6 text-muted-foreground">
           <li>
-            <strong>referralCode</strong> – The creator’s referral code captured from the URL.
+            Only call <code>Analytx.trackSale()</code> after a successful payment
           </li>
           <li>
-            <strong>skuId</strong> – SKU of the sold product (must belong to the campaign).
+            Do not call it on button click or before order confirmation
           </li>
           <li>
-            <strong>salePrice</strong> – Final sale amount used for commission calculation.
+            Call it once per order
+          </li>
+          <li>
+            Ensure correct <code>skuId</code> and <code>salePrice</code>
           </li>
         </ul>
+      </div>
 
-        <p className="text-muted-foreground mb-2">Example request:</p>
+      {/* Example Integrations */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-semibold mb-4">Example Integrations</h2>
+
+        <p className="text-muted-foreground mb-2">
+          Shopify / WooCommerce / Custom apps all follow the same rule:
+        </p>
+
         <pre className="bg-black text-white rounded-md p-4 text-sm overflow-x-auto">
-{`POST https://tryanalytx.com/api/event/sale
-Headers:
-  x-analytx-api-key: YOUR_API_KEY_HERE
-  Content-Type: application/json
-
-Body:
-{
-  "referralCode": "CREATOR123",
-  "skuId": "SKU-001",
-  "salePrice": 499
-}`}
+{`// Call this on order success page
+Analytx.trackSale({
+  skuId: order.sku,
+  salePrice: order.total
+});`}
         </pre>
-
-        <p className="text-muted-foreground">
-          On success, the API responds with <code>"Sale recorded"</code>. Invalid API keys, referral codes, or SKUs will return an error.
-        </p>
       </div>
 
-      {/* Recommended Flow */}
+      {/* Notes */}
       <div className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Recommended Flow</h2>
-        <p className="text-muted-foreground mb-2">
-          1. Creator shares a referral link: <code>https://yourbrand.com?ref=REFERRAL_CODE</code>
-        </p>
-        <p className="text-muted-foreground mb-2">
-          2. Frontend captures the <strong>referralCode</strong> during checkout.
-        </p>
-        <p className="text-muted-foreground mb-2">
-          3. Backend validates the purchase and sends the sale event to Analytx.
-        </p>
-        <p className="text-muted-foreground mb-2">
-          4. Analytx tracks attribution, commissions, and analytics in real time.
-        </p>
-      </div>
-
-      {/* Notes & Best Practices */}
-      <div className="mb-10">
-        <h2 className="text-2xl font-semibold mb-4">Notes & Best Practices</h2>
+        <h2 className="text-2xl font-semibold mb-4">Notes</h2>
         <ul className="list-disc ml-6 text-muted-foreground">
-          <li>Always send events from your backend.</li>
-          <li>Never expose your API key in frontend code.</li>
-          <li>Use custom headers only; avoid Authorization.</li>
-          <li>Send sale events immediately after successful payment.</li>
-          <li>Ensure products and referral codes belong to active campaigns.</li>
+          <li>No backend integration required</li>
+          <li>No manual referral handling needed</li>
+          <li>Analytx automatically manages attribution</li>
+          <li>Works across Shopify, WooCommerce, Webflow, and custom sites</li>
         </ul>
       </div>
 

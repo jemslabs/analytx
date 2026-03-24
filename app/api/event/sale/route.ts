@@ -2,57 +2,63 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyBrandApiKey } from "@/lib/verifyBrandApiKey";
 import { checkBrandSubscription } from "@/lib/checkBrandSubscription";
+import { z } from "zod";
 
+const saleEventSchema = z.object({
+  referralCode: z.string(),
+  skuId: z.string(),
+  salePrice: z.number().positive(),
+});
 export async function POST(req: Request) {
   const brand = await verifyBrandApiKey(req);
   if (!brand)
     return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
 
   try {
-    const { referralCode: code, skuId, salePrice } = await req.json();
+    const data = await req.json();
 
-    if (!code || !skuId || !salePrice) {
-      return NextResponse.json(
-        { msg: "referralCode, skuId, salePrice required" },
-        { status: 400 }
-      );
+    const validatedData = saleEventSchema.safeParse(data);
+    if (!validatedData.success) {
+      return NextResponse.json({ msg: "Invalid Data" }, { status: 400 });
     }
-    if (!code) {
-      return NextResponse.json(
-        { msg: "Missing referralCode" },
-        { status: 400 }
-      );
-    }
-
+    const { referralCode: code, skuId, salePrice } = validatedData.data;
     const referralCode = await prisma.referralCode.findUnique({
-      where: {
-        code,
+      where: { code },
+      select: {
+        memberId: true,
+        platform: true,
       },
     });
     if (!referralCode) {
       return NextResponse.json(
         { msg: "Referral Code not found" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     // 1. Validate Member
     const member = await prisma.campaignMember.findUnique({
       where: { id: referralCode.memberId },
       include: {
-        campaign: true
-      }
+        campaign: {
+          select: {
+            id: true,
+            status: true,
+            brandId: true,
+          },
+        },
+      },
     });
 
     if (!member) {
       return NextResponse.json(
         { msg: "Invalid referralCode" },
-        { status: 404 }
+        { status: 404 },
       );
     }
     if (member.campaign.status !== "ACTIVE") {
       return NextResponse.json(
         { msg: "Campaign is not active" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const subCheck = await checkBrandSubscription(member.campaign.brandId);
@@ -68,7 +74,7 @@ export async function POST(req: Request) {
     if (!product) {
       return NextResponse.json(
         { msg: "Product not found for this brand" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -83,10 +89,9 @@ export async function POST(req: Request) {
     if (!campaignProduct) {
       return NextResponse.json(
         { msg: "Product not part of this campaign" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
     // 4. Create Sale
     await prisma.saleEvent.create({
       data: {
@@ -101,7 +106,7 @@ export async function POST(req: Request) {
       {
         msg: "Sale recorded",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch {
     return NextResponse.json({ msg: "Internal error" }, { status: 500 });
