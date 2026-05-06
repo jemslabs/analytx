@@ -3,7 +3,7 @@
     // -----------------------------
     // CONSTANTS
     // -----------------------------
-    var REF_CODE = "ref_code";
+    var REF_KEY = "atx_ref";
 
     // -----------------------------
     // GET SCRIPT TAG + API KEY
@@ -15,7 +15,7 @@
     if (!API_KEY) return;
 
     // -----------------------------
-    // HELPER: GET QUERY PARAM 
+    // HELPER: GET QUERY PARAM
     // -----------------------------
     function getQueryParam(param) {
       try {
@@ -32,13 +32,17 @@
     function captureReferral() {
       try {
         var ref = getQueryParam("ref");
+        if (!ref) return;
 
-        if (ref) {
-          localStorage.setItem(REF_CODE, ref);
+        var key = REF_KEY + "_" + API_KEY;
+
+        var existing = localStorage.getItem(key);
+
+        // IMPORTANT: only set if NOT already present
+        if (!existing) {
+          localStorage.setItem(key, ref);
         }
-      } catch (e) {
-        // silent fail
-      }
+      } catch (e) {}
     }
 
     // Run immediately
@@ -56,11 +60,11 @@
       try {
         // Validate input
         if (!data || !data.skuId || !data.salePrice) return;
-
+        var key = REF_KEY + "_" + API_KEY;
         // Get referral from storage
         var referralCode = null;
         try {
-          referralCode = localStorage.getItem(REF_CODE);
+          referralCode = localStorage.getItem(key);
         } catch (e) {}
 
         // If no referral → exit
@@ -83,7 +87,7 @@
             // If success → clear referral
             if (response && response.ok) {
               try {
-                localStorage.removeItem(REF_CODE);
+                localStorage.removeItem(key);
               } catch (e) {}
             }
           })
