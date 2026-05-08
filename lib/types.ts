@@ -44,7 +44,7 @@ export type creatorProfileType = {
 export type BrandSubscriptionType = {
   id: number;
   brandId: number;
-  plan: "BRAND_GROWTH";
+  plan: "BRAND_GROWTH" | "BRAND_STARTER";
   startedAt: Date;
   expiresAt: Date;
 }

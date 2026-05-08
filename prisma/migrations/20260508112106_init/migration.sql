@@ -29,7 +29,7 @@ CREATE TYPE "PayoutModel" AS ENUM ('CPS', 'CPC', 'BOTH');
 CREATE TYPE "CommissionType" AS ENUM ('PERCENTAGE', 'FIXED');
 
 -- CreateEnum
-CREATE TYPE "Plan" AS ENUM ('BRAND_GROWTH');
+CREATE TYPE "Plan" AS ENUM ('BRAND_GROWTH', 'BRAND_STARTER');
 
 -- CreateEnum
 CREATE TYPE "PaymentProvider" AS ENUM ('RAZORPAY');
@@ -184,6 +184,7 @@ CREATE TABLE "BrandSubscription" (
     "plan" "Plan" NOT NULL DEFAULT 'BRAND_GROWTH',
     "startedAt" TIMESTAMP(3) NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
+    "usedFreeTrial" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "BrandSubscription_pkey" PRIMARY KEY ("id")
 );
@@ -274,10 +275,10 @@ ALTER TABLE "CampaignMember" ADD CONSTRAINT "CampaignMember_creatorId_fkey" FORE
 ALTER TABLE "ReferralCode" ADD CONSTRAINT "ReferralCode_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "CampaignMember"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SaleEvent" ADD CONSTRAINT "SaleEvent_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "CampaignMember"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SaleEvent" ADD CONSTRAINT "SaleEvent_campaignProductId_fkey" FOREIGN KEY ("campaignProductId") REFERENCES "CampaignProduct"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SaleEvent" ADD CONSTRAINT "SaleEvent_campaignProductId_fkey" FOREIGN KEY ("campaignProductId") REFERENCES "CampaignProduct"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SaleEvent" ADD CONSTRAINT "SaleEvent_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "CampaignMember"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClickEvent" ADD CONSTRAINT "ClickEvent_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "CampaignMember"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

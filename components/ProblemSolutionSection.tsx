@@ -11,46 +11,43 @@ const ProblemSolutionSection = () => {
   const challenges = [
     {
       icon: AlertCircle,
-      title: "Disconnected campaign data",
+      title: "Campaign data is scattered",
       description:
-        "Campaign performance lives across tools, spreadsheets, and dashboards — nothing in one place.",
+        "Clicks, sales, and creator performance are spread across spreadsheets, DMs, and different tools.",
     },
     {
       icon: Target,
-      title: "Unclear attribution",
+      title: "It’s hard to know what drives sales",
       description:
-        "Brands can’t confidently say which influencer actually drove sales.",
+        "Brands struggle to track which creators actually convert customers and drive revenue.",
     },
     {
       icon: DollarSign,
-      title: "Manual tracking & payouts",
+      title: "Payouts are still manual",
       description:
-        "Teams waste hours validating sales, calculating commissions, and managing payouts manually.",
+        "Teams still calculate creator commissions manually using spreadsheets and coupon codes.",
     },
   ];
 
   const fixes = [
     {
       icon: LayoutDashboard,
-      title: "Single source of truth",
+      title: "Everything in one dashboard",
       description:
-        "All campaign, click, and conversion data unified in one dashboard.",
+        "Track campaigns, clicks, sales, and creator performance from one place.",
     },
     {
       icon: TrendingUp,
-      title: "Reliable performance tracking",
+      title: "Track what actually converts",
       description:
-        "Server-side attribution connects every click to verified sales with precision.",
+        "See which creators drive clicks, sales, and revenue across every campaign.",
     },
     {
       icon: Users,
-      title: "Automatic tracking & payouts",
+      title: "Automate creator payouts",
       description:
-        "Sales and clicks are verified, payouts are calculated automatically."
-
-
+        "Automatically calculate creator payouts based on campaign performance.",
     },
-
   ];
 
   return (
@@ -58,14 +55,17 @@ const ProblemSolutionSection = () => {
       <div className="mx-auto max-w-7xl px-6">
         {/* Section header */}
         <div className="text-center mb-20">
-           <span className="inline-flex items-center rounded-full border bg-white px-4 py-1 text-sm font-medium text-black">
+          <span className="inline-flex items-center rounded-full border bg-white px-4 py-1 text-sm font-medium text-black">
             Problem / Solution
           </span>
+
           <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight text-foreground">
-            Why brands struggle with influencer campaigns
+            Managing creator campaigns gets messy fast
           </h2>
+
           <p className="mt-4 text-lg text-muted-foreground">
-            Running influencer campaigns is easy. Tracking what actually works is not.
+            Most brands still manage creator campaigns with spreadsheets,
+            coupon codes, and manual payouts.
           </p>
         </div>
 
@@ -76,11 +76,11 @@ const ProblemSolutionSection = () => {
               <span className="inline-flex items-center rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-600">
                 The Problem
               </span>
+
               <h3 className="mt-4 text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-                Where influencer campaigns break down
+                Where creator campaigns break down
               </h3>
             </div>
-
 
             <div className="space-y-6">
               {challenges.map((item) => (
@@ -96,6 +96,7 @@ const ProblemSolutionSection = () => {
                     <h3 className="font-medium text-foreground">
                       {item.title}
                     </h3>
+
                     <p className="mt-1 text-sm text-muted-foreground">
                       {item.description}
                     </p>
@@ -111,11 +112,11 @@ const ProblemSolutionSection = () => {
               <span className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-green-600">
                 The Solution
               </span>
+
               <h3 className="mt-4 text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
                 How AnalytX solves it
               </h3>
             </div>
-
 
             <div className="space-y-6">
               {fixes.map((item) => (
@@ -131,6 +132,7 @@ const ProblemSolutionSection = () => {
                     <h3 className="font-medium text-foreground">
                       {item.title}
                     </h3>
+
                     <p className="mt-1 text-sm text-muted-foreground">
                       {item.description}
                     </p>
@@ -140,7 +142,6 @@ const ProblemSolutionSection = () => {
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

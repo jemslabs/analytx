@@ -25,7 +25,8 @@ export default function FeaturesSection() {
           </h2>
 
           <p className="mt-4 text-lg text-muted-foreground">
-            Everything you need to measure influencer performance, sales impact, and ROI — without guesswork.
+            Manage creator campaigns, track performance, and understand what
+            actually drives revenue.
           </p>
         </div>
 
@@ -40,20 +41,19 @@ export default function FeaturesSection() {
                   <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">
-                  Campaign analytics
+                  Campaign performance
                 </span>
               </div>
 
               <h3 className="text-2xl font-semibold mb-3">
-                Full visibility into campaign performance
+                See exactly how creator campaigns perform
               </h3>
 
               <p className="text-muted-foreground max-w-xl">
-                Track clicks, conversions, and revenue across all campaigns —
-                broken down by creator, link, and product.
+                Track clicks, conversions, and revenue across every creator and
+                campaign in one place.
               </p>
 
-              {/* Graph visual */}
               <div className="mt-10 flex items-end gap-2 h-32">
                 {[40, 65, 55, 80, 60, 95, 70].map((h, i) => (
                   <div
@@ -77,14 +77,13 @@ export default function FeaturesSection() {
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                       <Target className="h-5 w-5 text-primary" />
                     </div>
-                    <h4 className="font-semibold">Accurate attribution</h4>
+                    <h4 className="font-semibold">Reliable attribution</h4>
                   </div>
-        
                 </div>
 
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  Every click and conversion is attributed to the correct
-                  campaign and creator using reliable server-side tracking.
+                  Every sale is linked back to the correct creator and campaign
+                  so you always know what drove revenue.
                 </p>
 
                 <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
@@ -106,14 +105,13 @@ export default function FeaturesSection() {
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                       <DollarSign className="h-5 w-5 text-primary" />
                     </div>
-                    <h4 className="font-semibold">Automated commissions</h4>
+                    <h4 className="font-semibold">Automatic payouts</h4>
                   </div>
-                  
                 </div>
 
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  Sales and clicks are verified automatically, commissions are
-                  calculated instantly.
+                  Calculate creator payouts instantly based on real sales and
+                  campaign performance.
                 </p>
 
                 <div className="mt-6 grid grid-cols-3 gap-3 text-xs">
@@ -142,12 +140,12 @@ export default function FeaturesSection() {
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
-                <h4 className="font-semibold">Creator insights</h4>
+                <h4 className="font-semibold">Top creators</h4>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
-                Identify top-performing creators and optimize partnerships using
-                actionable insights.
+                Identify creators that drive the most revenue and scale
+                partnerships that actually work.
               </p>
 
               <div className="space-y-2 text-xs text-muted-foreground">
@@ -170,16 +168,16 @@ export default function FeaturesSection() {
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Link2 className="h-5 w-5 text-primary" />
                 </div>
-                <h4 className="font-semibold">Platform referral links</h4>
+                <h4 className="font-semibold">Creator referral links</h4>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
-                Creators can generate multiple referral links per platform for
-                precise tracking.
+                Creators generate unique links for every campaign and platform
+                for accurate tracking.
               </p>
 
               <div className="rounded-lg border p-3 text-xs text-muted-foreground">
-                tryanalytx.com/r/creator123
+                analytx.com/r/creator123
               </div>
             </div>
           </div>
@@ -191,18 +189,19 @@ export default function FeaturesSection() {
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <ShieldCheck className="h-5 w-5 text-primary" />
                 </div>
-                <h4 className="font-semibold">Server-side tracking</h4>
+                <h4 className="font-semibold">Reliable tracking</h4>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
-                Reliable tracking that bypasses ad blockers and client-side
-                failures.
+                Reliable tracking of clicks and sales across all campaigns.
               </p>
 
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="rounded-md border px-2 py-1">API</span>
-                <span className="rounded-md border px-2 py-1">Secure</span>
-                <span className="rounded-md border px-2 py-1">Scalable</span>
+                <span className="rounded-md border px-2 py-1">Accurate</span>
+                <span className="rounded-md border px-2 py-1">Consistent</span>
+                <span className="rounded-md border px-2 py-1">
+                  Campaign-level
+                </span>
               </div>
             </div>
           </div>

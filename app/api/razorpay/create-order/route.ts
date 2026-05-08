@@ -4,7 +4,7 @@ import { razorpay } from "@/lib/razorpay";
 import { applyCoupon } from "@/lib/tools";
 import { NextResponse } from "next/server";
 
-const PLAN_AMOUNT = 9999; // INR
+const PLAN_AMOUNT = 999; // INR
 
 export async function POST(req: Request) {
   try {
@@ -25,8 +25,8 @@ export async function POST(req: Request) {
 
     if (user.role !== "BRAND") {
       return NextResponse.json(
-        { msg: "Only brand can purchase growth plan" },
-        { status: 400 }
+        { msg: "Only brand can purchase plan" },
+        { status: 400 },
       );
     }
 
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     if (!brand) {
       return NextResponse.json(
         { msg: "Brand profile not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     if (existingSub && existingSub.expiresAt > new Date()) {
       return NextResponse.json(
         { msg: "Subscription already active" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       receipt: `receipt_${brand.id}_${Date.now()}`,
       notes: {
         brandId: String(brand.id),
-        plan: "BRAND_GROWTH",
+        plan: "BRAND_STARTER",
         originalAmount: PLAN_AMOUNT,
         finalAmount: pricing.finalAmount,
         discountPercent: pricing.discountPercent ?? 0,
@@ -74,18 +74,13 @@ export async function POST(req: Request) {
       },
     });
 
-
-
     return NextResponse.json({
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      finalAmount: pricing.finalAmount
+      finalAmount: pricing.finalAmount,
     });
   } catch {
-    return NextResponse.json(
-      { msg: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });
   }
 }

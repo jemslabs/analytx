@@ -12,9 +12,9 @@ model User {
   email          String          @unique
   password       String
   role           UserRole
+  createdAt      DateTime        @default(now())
   brandProfile   BrandProfile?
   creatorProfile CreatorProfile?
-  createdAt      DateTime        @default(now())
 
   @@index([email])
 }
@@ -22,63 +22,56 @@ model User {
 model BrandProfile {
   id             Int                @id @default(autoincrement())
   userId         Int                @unique
-  user           User               @relation(fields: [userId], references: [id])
   name           String
   description    String?
   industry       IndustryCategory   @default(OTHER)
   websiteUrl     String?
   contactEmail   String?
-  products       Product[]
-  campaigns      Campaign[]
   apiKey         String?            @unique
-  subscription   BrandSubscription?
-  paymentRecords PaymentRecord[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime?          @updatedAt
+  user           User               @relation(fields: [userId], references: [id])
+  subscription   BrandSubscription?
+  campaigns      Campaign[]
+  paymentRecords PaymentRecord[]
+  products       Product[]
 }
 
 model CreatorProfile {
   id        Int              @id @default(autoincrement())
   userId    Int              @unique
-  user      User             @relation(fields: [userId], references: [id])
   name      String
   bio       String?
   niche     CreatorNiche
-  campaigns CampaignMember[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+  campaigns CampaignMember[]
+  user      User             @relation(fields: [userId], references: [id])
 }
 
 model Product {
-  id         Int           @id @default(autoincrement())
-  brandId    Int
-  brand      BrandProfile  @relation(fields: [brandId], references: [id])
-  name       String
-  basePrice  Float
-  skuId      String
-  productUrl String
-  currency   Currency      @default(INR)
-  status     ProductStatus @default(AVAILABLE)
-
-  campaignProducts CampaignProduct[]
+  id               Int               @id @default(autoincrement())
+  brandId          Int
+  name             String
+  basePrice        Float
+  skuId            String
+  productUrl       String
+  currency         Currency          @default(INR)
+  status           ProductStatus     @default(AVAILABLE)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  campaignProducts CampaignProduct[]
+  brand            BrandProfile      @relation(fields: [brandId], references: [id])
 
   @@unique([brandId, skuId])
 }
 
 model Campaign {
-  id          Int            @id @default(autoincrement())
-  brandId     Int
-  brand       BrandProfile   @relation(fields: [brandId], references: [id])
-  name        String
-  status      CampaignStatus @default(DRAFT)
-  redirectUrl String
-
-  products          CampaignProduct[]
-  invites           CampaignInvite[]
-  members           CampaignMember[]
-  // CPS and CPC settings
+  id                Int               @id @default(autoincrement())
+  brandId           Int
+  name              String
+  status            CampaignStatus    @default(DRAFT)
+  redirectUrl       String
   currency          Currency          @default(INR)
   payoutModel       PayoutModel       @default(BOTH)
   cpsCommissionType CommissionType
@@ -88,16 +81,19 @@ model Campaign {
   completedAt       DateTime?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+  brand             BrandProfile      @relation(fields: [brandId], references: [id])
+  invites           CampaignInvite[]
+  members           CampaignMember[]
+  products          CampaignProduct[]
 }
 
 model CampaignProduct {
-  id         Int @id @default(autoincrement())
+  id         Int         @id @default(autoincrement())
   campaignId Int
   productId  Int
-
-  campaign Campaign    @relation(fields: [campaignId], references: [id])
-  product  Product     @relation(fields: [productId], references: [id])
-  sales    SaleEvent[]
+  campaign   Campaign    @relation(fields: [campaignId], references: [id])
+  product    Product     @relation(fields: [productId], references: [id])
+  sales      SaleEvent[]
 
   @@unique([campaignId, productId])
 }
@@ -105,96 +101,85 @@ model CampaignProduct {
 model CampaignInvite {
   id         Int          @id @default(autoincrement())
   campaignId Int
-  campaign   Campaign     @relation(fields: [campaignId], references: [id])
   email      String
   status     InviteStatus @default(PENDING)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  campaign   Campaign     @relation(fields: [campaignId], references: [id])
 
   @@unique([campaignId, email])
 }
 
 model CampaignMember {
-  id Int @id @default(autoincrement())
-
-  campaignId Int
-  creatorId  Int
-
+  id            Int            @id @default(autoincrement())
+  campaignId    Int
+  creatorId     Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  campaign      Campaign       @relation(fields: [campaignId], references: [id])
+  creator       CreatorProfile @relation(fields: [creatorId], references: [id])
+  clicks        ClickEvent[]
   referralCodes ReferralCode[]
-
-  campaign Campaign       @relation(fields: [campaignId], references: [id])
-  creator  CreatorProfile @relation(fields: [creatorId], references: [id])
-
-  sales     SaleEvent[]
-  clicks    ClickEvent[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  sales         SaleEvent[]
 
   @@unique([campaignId, creatorId])
 }
 
 model ReferralCode {
-  id       Int            @id @default(autoincrement())
-  memberId Int
-  member   CampaignMember @relation(fields: [memberId], references: [id])
-  platform PlatformType
-  code     String         @unique
-
-  createdAt DateTime @default(now())
+  id        Int            @id @default(autoincrement())
+  memberId  Int
+  platform  PlatformType
+  code      String         @unique
+  createdAt DateTime       @default(now())
+  member    CampaignMember @relation(fields: [memberId], references: [id])
 
   @@unique([memberId, platform])
 }
 
 model SaleEvent {
-  id        Int            @id @default(autoincrement())
-  salePrice Float
-  currency  Currency       @default(INR)
-  memberId  Int
-  member    CampaignMember @relation(fields: [memberId], references: [id])
-
+  id                Int             @id @default(autoincrement())
+  salePrice         Float
+  currency          Currency        @default(INR)
+  memberId          Int
   campaignProductId Int
-  campaignProduct   CampaignProduct @relation(fields: [campaignProductId], references: [id])
   platform          PlatformType
   purchasedAt       DateTime        @default(now())
+  campaignProduct   CampaignProduct @relation(fields: [campaignProductId], references: [id])
+  member            CampaignMember  @relation(fields: [memberId], references: [id])
 }
 
 model ClickEvent {
   id       Int            @id @default(autoincrement())
   memberId Int
-  member   CampaignMember @relation(fields: [memberId], references: [id])
   platform PlatformType
   count    Int            @default(0)
   date     DateTime
+  member   CampaignMember @relation(fields: [memberId], references: [id])
 
   @@unique([memberId, platform, date])
 }
 
 model BrandSubscription {
-  id Int @id @default(autoincrement())
-
-  brandId Int          @unique
-  brand   BrandProfile @relation(fields: [brandId], references: [id])
-
-  plan          Plan     @default(BRAND_GROWTH)
+  id            Int          @id @default(autoincrement())
+  brandId       Int          @unique
+  plan          Plan         @default(BRAND_STARTER)
   startedAt     DateTime
   expiresAt     DateTime
-  usedFreeTrial Boolean  @default(false)
+  usedFreeTrial Boolean      @default(false)
+  brand         BrandProfile @relation(fields: [brandId], references: [id])
 
   @@index([brandId])
 }
 
 model PaymentRecord {
-  id Int @id @default(autoincrement())
-
-  brandId Int
-  brand   BrandProfile @relation(fields: [brandId], references: [id])
-
+  id                Int             @id @default(autoincrement())
+  brandId           Int
   amount            Int
   currency          Currency        @default(INR)
   provider          PaymentProvider @default(RAZORPAY)
   providerPaymentId String
   paidAt            DateTime        @default(now())
+  brand             BrandProfile    @relation(fields: [brandId], references: [id])
 }
 
 enum UserRole {
@@ -262,9 +247,9 @@ enum InviteStatus {
 }
 
 enum PayoutModel {
-  CPS // cost per sale only
-  CPC // cost per click only
-  BOTH // mix of CPS + CPC
+  CPS
+  CPC
+  BOTH
 }
 
 enum CommissionType {
@@ -274,6 +259,7 @@ enum CommissionType {
 
 enum Plan {
   BRAND_GROWTH
+  BRAND_STARTER
 }
 
 enum PaymentProvider {
