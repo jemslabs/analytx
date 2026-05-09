@@ -13,19 +13,19 @@ const ProblemSolutionSection = () => {
       icon: AlertCircle,
       title: "Campaign data is scattered",
       description:
-        "Clicks, sales, and creator performance are spread across spreadsheets, DMs, and different tools.",
+        "Clicks, sales, and influencer performance are spread across spreadsheets, DMs, and different tools.",
     },
     {
       icon: Target,
       title: "It’s hard to know what drives sales",
       description:
-        "Brands struggle to track which creators actually convert customers and drive revenue.",
+        "Brands struggle to track which influencers actually convert customers and drive revenue.",
     },
     {
       icon: DollarSign,
       title: "Payouts are still manual",
       description:
-        "Teams still calculate creator commissions manually using spreadsheets and coupon codes.",
+        "Teams still calculate influencer commissions manually using spreadsheets and coupon codes.",
     },
   ];
 
@@ -34,19 +34,19 @@ const ProblemSolutionSection = () => {
       icon: LayoutDashboard,
       title: "Everything in one dashboard",
       description:
-        "Track campaigns, clicks, sales, and creator performance from one place.",
+        "Track campaigns, clicks, sales, and influencer performance from one place.",
     },
     {
       icon: TrendingUp,
       title: "Track what actually converts",
       description:
-        "See which creators drive clicks, sales, and revenue across every campaign.",
+        "See which influencers drive clicks, sales, and revenue across every campaign.",
     },
     {
       icon: Users,
-      title: "Automate creator payouts",
+      title: "Automate influencer payouts",
       description:
-        "Automatically calculate creator payouts based on campaign performance.",
+        "Automatically calculate influencer payouts based on campaign performance.",
     },
   ];
 
@@ -60,11 +60,11 @@ const ProblemSolutionSection = () => {
           </span>
 
           <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight text-foreground">
-            Managing creator campaigns gets messy fast
+            Managing influencer campaigns gets messy fast
           </h2>
 
           <p className="mt-4 text-lg text-muted-foreground">
-            Most brands still manage creator campaigns with spreadsheets,
+            Most brands still manage influencer campaigns with spreadsheets,
             coupon codes, and manual payouts.
           </p>
         </div>
@@ -78,7 +78,7 @@ const ProblemSolutionSection = () => {
               </span>
 
               <h3 className="mt-4 text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-                Where creator campaigns break down
+                Where influencer campaigns break down
               </h3>
             </div>
 

@@ -23,15 +23,15 @@ function HeroSection() {
         <h1 className="mx-auto max-w-[820px] text-center text-[2.2rem] font-semibold leading-[1.15] tracking-[-0.04em] text-gray-950 sm:text-5xl sm:leading-[1.1] md:text-6xl lg:text-[4.5rem] lg:leading-[1.02]">
           Manage and track{" "}
           <span className="inline-block rounded-xl bg-primary/10 px-3 py-1 text-primary">
-            creator campaigns
+            influencer campaigns
           </span> <br />
           in one dashboard
         </h1>
 
         {/* Description */}
         <p className="mx-auto mt-6 max-w-2xl text-center text-base leading-7 text-muted-foreground sm:text-lg md:text-xl">
-          AnalytX helps brands manage creator campaigns, track performance, and
-          calculate payouts from one dashboard.
+          AnalytX helps brands manage influencer campaigns, track performance, and
+          calculate payouts with simple and reliable tracking.
         </p>
 
         {/* Actions – unchanged */}

@@ -25,7 +25,7 @@ export default function FeaturesSection() {
           </h2>
 
           <p className="mt-4 text-lg text-muted-foreground">
-            Manage creator campaigns, track performance, and understand what
+            Manage influencer campaigns, track performance, and understand what
             actually drives revenue.
           </p>
         </div>
@@ -46,12 +46,12 @@ export default function FeaturesSection() {
               </div>
 
               <h3 className="text-2xl font-semibold mb-3">
-                See exactly how creator campaigns perform
+                See exactly how influencer campaigns perform
               </h3>
 
               <p className="text-muted-foreground max-w-xl">
-                Track clicks, conversions, and revenue across every creator and
-                campaign in one place.
+                Track clicks, conversions, and revenue across every influencer
+                and campaign in one place.
               </p>
 
               <div className="mt-10 flex items-end gap-2 h-32">
@@ -82,14 +82,14 @@ export default function FeaturesSection() {
                 </div>
 
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  Every sale is linked back to the correct creator and campaign
+                  Every sale is linked back to the correct influencer and campaign
                   so you always know what drove revenue.
                 </p>
 
                 <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="rounded-md border px-2 py-1">Click</span>
                   <span>→</span>
-                  <span className="rounded-md border px-2 py-1">Creator</span>
+                  <span className="rounded-md border px-2 py-1">Influencer</span>
                   <span>→</span>
                   <span className="rounded-md border px-2 py-1">Sale</span>
                 </div>
@@ -110,7 +110,7 @@ export default function FeaturesSection() {
                 </div>
 
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  Calculate creator payouts instantly based on real sales and
+                  Calculate influencer payouts instantly based on real sales and
                   campaign performance.
                 </p>
 
@@ -140,18 +140,18 @@ export default function FeaturesSection() {
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
-                <h4 className="font-semibold">Top creators</h4>
+                <h4 className="font-semibold">Top influencers</h4>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
-                Identify creators that drive the most revenue and scale
+                Identify influencers that drive the most revenue and scale
                 partnerships that actually work.
               </p>
 
               <div className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex justify-between">
-                  <span>Top creator</span>
-                  <span className="font-medium text-foreground">Creator A</span>
+                  <span>Top influencer</span>
+                  <span className="font-medium text-foreground">Influencer A</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Conversion rate</span>
@@ -168,16 +168,16 @@ export default function FeaturesSection() {
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Link2 className="h-5 w-5 text-primary" />
                 </div>
-                <h4 className="font-semibold">Creator referral links</h4>
+                <h4 className="font-semibold">Influencer referral links</h4>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
-                Creators generate unique links for every campaign and platform
+                Influencers generate unique links for every campaign and platform
                 for accurate tracking.
               </p>
 
               <div className="rounded-lg border p-3 text-xs text-muted-foreground">
-                analytx.com/r/creator123
+                analytx.com/r/influencer123
               </div>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function FeaturesSection() {
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
-                Reliable tracking of clicks and sales across all campaigns.
+                Reliable tracking of clicks and sales across all influencer campaigns.
               </p>
 
               <div className="flex items-center gap-2 text-xs text-muted-foreground">

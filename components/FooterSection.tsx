@@ -13,7 +13,8 @@ export default function Footer() {
             height={100}
             alt="Logo" />
           <p className="text-sm text-muted-foreground max-w-md">
-            AnalytX helps brands manage creator campaigns, track performance, and calculate payouts from one dashboard.
+            AnalytX helps brands manage influencer campaigns, track performance, and
+            calculate payouts with simple and reliable tracking.
           </p>
         </div>
 
